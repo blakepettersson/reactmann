@@ -1,6 +1,5 @@
 package reactmann;
 
-import com.aphyr.riemann.Proto;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
@@ -19,7 +18,7 @@ import java.util.stream.Collectors;
  * @author blake
  */
 public class Query {
-   public static rx.functions.Func1<Proto.Event, Boolean> parse(String query) {
+   public static rx.functions.Func1<Event, Boolean> parse(String query) {
       QueryLexer tokenSource = new QueryLexer(new ANTLRStringStream(query));
       QueryParser queryParser = new QueryParser(new CommonTokenStream(tokenSource));
       try {
@@ -30,16 +29,13 @@ public class Query {
       }
    }
 
-   private static Object getFilter(CommonTree tree, Proto.Event event) {
+   private static Object getFilter(CommonTree tree, Event event) {
       List<CommonTree> children = Optional.ofNullable(tree.getChildren())
          .map(t -> (List<CommonTree>) t)
          .orElseGet(ArrayList::new)
          .stream()
          .filter(f -> !"(".equals(f.getText()) && !")".equals(f.getText()))
          .collect(Collectors.toList());
-      //@SuppressWarnings("unchecked") Stream<CommonTree> map = tree.getChildren() != null ? tree.getChildren().stream().map(f -> (CommonTree) f) : Stream
-      //   .<CommonTree>empty();
-      //List<CommonTree> children = map.filter(f -> !f.getText().equals("(") && !f.getText().equals(")")).collect(Collectors.toList());
 
       switch (tree.getText()) {
       case "or":
@@ -72,7 +68,7 @@ public class Query {
          return false;
       case "tagged":
          //noinspection SuspiciousMethodCalls
-         return event.getTagsList().contains(parseString(children.get(0)));
+         return event.getTags().contains(parseString(children.get(0)));
       case "host":
          return event.getHost();
       case "service":
@@ -82,9 +78,9 @@ public class Query {
       case "description":
          return event.getDescription();
       case "metric_f":
-         return event.getMetricD();
+         return event.getMetric();
       case "metric":
-         return event.getMetricSint64();
+         return event.getMetric();
       case "time":
          return event.getTime();
       case "ttl":
@@ -114,21 +110,21 @@ public class Query {
       }
    }
 
-   private static Object parseOr(Proto.Event event, List<CommonTree> children) {
+   private static Object parseOr(Event event, List<CommonTree> children) {
       Object left = getFilter(children.get(0), event);
       Object right = getFilter(children.get(1), event);
 
       return (boolean) left || (boolean) right;
    }
 
-   private static Object parseAnd(Proto.Event event, List<CommonTree> children) {
+   private static Object parseAnd(Event event, List<CommonTree> children) {
       Object left = getFilter(children.get(0), event);
       Object right = getFilter(children.get(1), event);
 
       return (boolean) left && (boolean) right;
    }
 
-   private static Object parseEquals(Proto.Event event, List<CommonTree> children) {
+   private static Object parseEquals(Event event, List<CommonTree> children) {
       Object left = getFilter(children.get(0), event);
       Object right = getFilter(children.get(1), event);
       if (left instanceof Number) {
@@ -138,7 +134,7 @@ public class Query {
       return left.equals("" + right);
    }
 
-   private static boolean parseLessThan(Proto.Event event, List<CommonTree> children) {
+   private static boolean parseLessThan(Event event, List<CommonTree> children) {
       Object number1 = getFilter(children.get(0), event);
       Object number2 = getFilter(children.get(1), event);
 
@@ -153,7 +149,7 @@ public class Query {
       throw new IllegalStateException("Arguments are not numbers");
    }
 
-   private static boolean parseLessThanOrEqual(Proto.Event event, List<CommonTree> children) {
+   private static boolean parseLessThanOrEqual(Event event, List<CommonTree> children) {
       Object number1 = getFilter(children.get(0), event);
       Object number2 = getFilter(children.get(1), event);
 
@@ -168,7 +164,7 @@ public class Query {
       throw new IllegalStateException("Arguments are not numbers");
    }
 
-   private static boolean parseLargerThan(Proto.Event event, List<CommonTree> children) {
+   private static boolean parseLargerThan(Event event, List<CommonTree> children) {
       Object number1 = getFilter(children.get(0), event);
       Object number2 = getFilter(children.get(1), event);
 
@@ -183,7 +179,7 @@ public class Query {
       throw new IllegalStateException("Arguments are not numbers");
    }
 
-   private static boolean parseLargerThanOrEqual(Proto.Event event, List<CommonTree> children) {
+   private static boolean parseLargerThanOrEqual(Event event, List<CommonTree> children) {
       Object number1 = getFilter(children.get(0), event);
       Object number2 = getFilter(children.get(1), event);
 
