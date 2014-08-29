@@ -21,12 +21,12 @@ public class Riemann {
    public static Observable<Event> getEvents(Vertx vertx) {
       return new RxVertx(vertx).eventBus().registerHandler("riemann.stream").flatMap(m -> {
          try {
+            //noinspection unchecked
             return Observable.from(Proto.Msg.parseFrom((byte[]) m.body()).getEventsList());
          } catch (InvalidProtocolBufferException e) {
             throw new RuntimeException(e);
          }
-      }).map(e -> new Event(e.getHost(), e.getService(), e.getState(), e.getDescription(), e.getTagsList(), e.getTime(), e.getTtl(),
-         e.getMetricSint64(), e.getMetricD()));
+      }).map(Event::fromProtoBufEvent);
    }
 
    public static <T extends WriteStream<T>> Observable<Tup2<T, Proto.Msg>> convertBufferStreamToMessages(T socket, Observable<Buffer> observable) {
@@ -44,7 +44,7 @@ public class Riemann {
          try {
             return Proto.Msg.parseFrom(r.getBytes(4, r.length()));
          } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new NetSocketException(socket, e);
          }
       }).map(b -> Tup2.create(socket, b));
    }
