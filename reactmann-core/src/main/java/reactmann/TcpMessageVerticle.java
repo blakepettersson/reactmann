@@ -1,54 +1,50 @@
 package reactmann;
 
 import com.aphyr.riemann.Proto;
-import org.vertx.java.core.Handler;
+import io.vertx.rxcore.java.RxVertx;
+import io.vertx.rxcore.java.net.RxNetServer;
 import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.net.NetSocket;
-import org.vertx.java.core.streams.Pump;
 import org.vertx.java.platform.Verticle;
 
 public class TcpMessageVerticle extends Verticle {
-   
+
    public void start() {
-      container.logger().info("Starting TCP listener at port 5555");
-      vertx.createNetServer().connectHandler(sock -> {
+      /*
+      vertx.createHttpServer().websocketHandler(sock -> {
          Pump.createPump(sock, sock).start();
 
-         sock.dataHandler(new Handler<Buffer>() {
+         Riemann.getEvents(vertx).forEach(e -> {
+            JsonObject obj = new JsonObject()
+               .putArray("tags", new JsonArray(e.getTags().toArray()))
+               .putString("host", e.getHost())
+               .putString("state", e.getState())
+               .putString("service", e.getService())
+               .putString("description", e.getDescription())
+               .putNumber("metric", e.getMetric())
+               .putNumber("metric_f", e.getMetricD())
+               .putNumber("time", e.getTime())
+               .putNumber("ttl", e.getTtl());
 
-            Buffer received;
-
-            @Override
-            public void handle(Buffer buffer) {
-               if (received == null) {
-                  received = new Buffer();
-               }
-               received.appendBuffer(buffer);
-
-               int size = received.getInt(0);
-               int expectedSize = size + 4;
-
-               if (received.length() == expectedSize) {
-                  try {
-                     byte[] protobuf = received.getBytes(4, expectedSize);
-
-                     //Check to see that message can be parsed.
-                     Proto.Msg.parseFrom(protobuf);
-
-                     sendResponse(Proto.Msg.newBuilder().setOk(true).build(), sock);
-
-                     vertx.eventBus().publish("riemann.stream", protobuf);
-
-                  } catch (Exception e) {
-                     sendResponse(Proto.Msg.newBuilder().setError(e.getMessage()).build(), sock);
-                     container.logger().error(e);
-                  }
-
-                  received = null;
-               }
-            }
+            sock.writeTextFrame(obj.encode());
          });
-      }).listen(5555);
+      }).listen(5556);
+      */
+
+      RxVertx rxVertx = new RxVertx(vertx);
+
+      RxNetServer netServer = rxVertx.createNetServer();
+
+      netServer
+         .connectStream()
+         .flatMap(s -> Riemann.convertBufferStreamToMessages(s.coreSocket(), s.asObservable()))
+         .subscribe(s -> {
+            sendResponse(Proto.Msg.newBuilder().setOk(true).build(), s.getLeft());
+            vertx.eventBus().publish("riemann.stream", s.getRight().toByteArray());
+         });
+
+      netServer.coreServer().listen(5555);
+      container.logger().info("Started TCP listener at port 5555");
    }
 
    private void sendResponse(Proto.Msg msg, NetSocket sock) {
