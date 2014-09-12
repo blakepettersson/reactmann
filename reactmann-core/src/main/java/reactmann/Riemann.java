@@ -18,6 +18,18 @@ public class Riemann {
    private Riemann() {
    }
 
+   public static Observable<Event> getIndex(Vertx vertx) {
+      return Observable.concat(Observable.from(new Index(vertx).values()), new RxVertx(vertx).eventBus().registerHandler("riemann.index").flatMap(m -> {
+            try {
+               Event event = Event.fromProtoBufEvent(Proto.Event.parseFrom((byte[]) m.body()));
+               return Observable.just(event);
+            } catch (InvalidProtocolBufferException e) {
+               throw new RuntimeException(e);
+            }
+         }
+      ));
+   }
+
    public static Observable<Event> getEvents(Vertx vertx) {
       return new RxVertx(vertx).eventBus().registerHandler("riemann.stream").flatMap(m -> {
          try {

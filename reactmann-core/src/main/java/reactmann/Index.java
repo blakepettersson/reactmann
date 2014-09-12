@@ -71,7 +71,7 @@ public class Index implements ConcurrentSharedMap<Tup2<String, String>, Event> {
          timeouts.remove(key);
       }
 
-      vertx.eventBus().publish("riemann.index", value);
+      vertx.eventBus().publish("riemann.index", value.toProtoBufEvent().toByteArray());
       timeouts.put(key, vertx.setTimer(Math.round(value.getTtl()), (e) -> remove(key)));
       return map.put(key, value);
    }
@@ -89,8 +89,10 @@ public class Index implements ConcurrentSharedMap<Tup2<String, String>, Event> {
       Event expired = new Event(remove.getHost(), remove.getService(), "expired", remove.getDescription(), remove.getTags(), remove.getTime(),
          remove.getTtl(), remove.getMetric());
 
-      vertx.eventBus().publish("riemann.index", expired);
-      vertx.eventBus().publish("riemann.stream", Proto.Msg.newBuilder().addEvents(expired.toProtoBufEvent()).build().toByteArray());
+      Proto.Event value = expired.toProtoBufEvent();
+
+      vertx.eventBus().publish("riemann.index", value.toByteArray());
+      vertx.eventBus().publish("riemann.stream", Proto.Msg.newBuilder().addEvents(value).build().toByteArray());
 
       return expired;
    }

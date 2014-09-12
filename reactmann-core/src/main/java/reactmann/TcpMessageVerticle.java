@@ -35,7 +35,8 @@ public class TcpMessageVerticle extends Verticle {
          }
       }).subscribe(r -> {
          RxServerWebSocket socket = r.getLeft();
-         Subscription subscription = Riemann.getEvents(vertx)
+
+         Subscription subscription = Riemann.getIndex(vertx)
             .filter(r.getRight())
             .map(e -> new JsonObject()
                .putArray("tags", new JsonArray(e.getTags().toArray()))
