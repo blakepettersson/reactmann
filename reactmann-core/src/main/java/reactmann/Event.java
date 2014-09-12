@@ -1,13 +1,15 @@
 package reactmann;
 
 import com.aphyr.riemann.Proto;
+import org.vertx.java.core.shareddata.Shareable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author blake
  */
-public class Event {
+public class Event implements Shareable {
    private final String host;
    private final String service;
    private final String state;
@@ -22,7 +24,7 @@ public class Event {
       this.service = service;
       this.state = state;
       this.description = description;
-      this.tags = tags;
+      this.tags = tags != null ? tags : new ArrayList<>();
       this.time = time;
       this.ttl = ttl;
       this.metric = metric;
@@ -39,6 +41,19 @@ public class Event {
       }
 
       return new Event(event.getHost(), event.getService(), event.getState(), event.getDescription(), event.getTagsList(), event.getTime(), event.getTtl(), metric);
+   }
+
+   public Proto.Event toProtoBufEvent() {
+      return Proto.Event.newBuilder()
+         .setDescription(description)
+         .setHost(host)
+         .setMetricD(metric)
+         .setService(service)
+         .setTime(time)
+         .setTtl(ttl)
+         .setState(state)
+         .addAllTags(tags)
+         .build();
    }
 
    public double getMetric() {

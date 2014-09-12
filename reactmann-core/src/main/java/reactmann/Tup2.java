@@ -1,9 +1,11 @@
 package reactmann;
 
+import org.vertx.java.core.shareddata.Shareable;
+
 /**
  * @author blake
  */
-public class Tup2<L, R> {
+public class Tup2<L, R> implements Shareable {
    private final L left;
    private final R right;
 
