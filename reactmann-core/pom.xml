@@ -65,24 +65,22 @@
 
    <dependencies>
       <!--Vertx provided dependencies-->
-      <dependency>
-         <groupId>io.vertx</groupId>
-         <artifactId>vertx-core</artifactId>
-         <version>${vertx.version}</version>
-         <scope>provided</scope>
-      </dependency>
-      <dependency>
-         <groupId>io.vertx</groupId>
-         <artifactId>vertx-platform</artifactId>
-         <version>${vertx.version}</version>
-         <scope>provided</scope>
-      </dependency>
-      <dependency>
-         <groupId>io.vertx</groupId>
-         <artifactId>vertx-hazelcast</artifactId>
-         <version>${vertx.version}</version>
-         <scope>provided</scope>
-      </dependency>
+       <dependency>
+           <groupId>io.vertx</groupId>
+           <artifactId>vertx-core</artifactId>
+           <version>3.0.0-SNAPSHOT</version>
+       </dependency>
+       <dependency>
+           <groupId>io.vertx</groupId>
+           <artifactId>vertx-hazelcast</artifactId>
+           <version>3.0.0-SNAPSHOT</version>
+       </dependency>
+       <dependency>
+           <groupId>io.vertx</groupId>
+           <artifactId>ext-rxjava</artifactId>
+           <version>3.0.0-SNAPSHOT</version>
+       </dependency>
+
       <!--Test dependencies-->
       <dependency>
          <groupId>junit</groupId>
@@ -90,29 +88,8 @@
          <version>4.11</version>
          <scope>test</scope>
       </dependency>
-      <dependency>
-         <groupId>io.vertx</groupId>
-         <artifactId>testtools</artifactId>
-         <version>${vertx.testtools.version}</version>
-         <scope>test</scope>
-      </dependency>
+
       <!-- Reactmann dependencies -->
-      <dependency>
-         <groupId>com.netflix.rxjava</groupId>
-         <artifactId>rxjava-core</artifactId>
-         <version>0.20.0</version>
-      </dependency>
-      <dependency>
-         <groupId>io.vertx</groupId>
-         <artifactId>mod-rxvertx</artifactId>
-         <version>1.0.0-beta5</version>
-         <exclusions>
-            <exclusion>
-               <groupId>com.netflix.rxjava</groupId>
-               <artifactId>rxjava-core</artifactId>
-            </exclusion>
-         </exclusions>
-      </dependency>
       <dependency>
          <groupId>com.aphyr</groupId>
          <artifactId>riemann-java-client</artifactId>
@@ -132,182 +109,65 @@
 
    <build>
       <plugins>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <version>${maven.compiler.plugin.version}</version>
+              <configuration>
+                  <source>1.8</source>
+                  <target>1.8</target>
+              </configuration>
+          </plugin>
+          <!-- Fat executable jars
+If you want your project to output a fat executable standalone jar with all the dependencies in it you
+can use the shade plugin. -->
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-shade-plugin</artifactId>
+              <version>2.3</version>
+              <executions>
+                  <execution>
+                      <phase>package</phase>
+                      <goals>
+                          <goal>shade</goal>
+                      </goals>
+                      <configuration>
+                          <transformers>
+                              <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                  <manifestEntries>
+                                      <!-- If you want your main verticle to run automatically when you run execute the jar with:
+                                      java -jar <jar_name>
+                                      Then specify the Main-Class as io.vertx.core.Starter and the Main-Verticle as the verticle
+                                      you want to run, as follows:
+                                      -->
+                                      <Main-Class>io.vertx.core.Starter</Main-Class>
+                                      <Main-Verticle>java:reactmann.TcpMessageVerticle</Main-Verticle>
 
-         <!-- The vert.x Maven plugin -->
-         <plugin>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-maven-plugin</artifactId>
-            <version>${maven.vertx.plugin.version}</version>
-            <!--
-            You can specify extra config to the plugin as required here
-            <configuration>
-               <configFile>/path/to/MyVerticle.conf</configFile>
-               <instances>1</instances>
-               <classpath>src/main/resources/:src/test/resources/:target/classes/:target/test-classes/</classpath>
-            </configuration>
-            -->
-            <!-- Make sure that the plugin uses the vert.x versions from this pom.xml not from its own pom.xml -->
-            <dependencies>
-               <dependency>
-                  <groupId>io.vertx</groupId>
-                  <artifactId>vertx-platform</artifactId>
-                  <version>${vertx.version}</version>
-               </dependency>
-               <dependency>
-                  <groupId>io.vertx</groupId>
-                  <artifactId>vertx-core</artifactId>
-                  <version>${vertx.version}</version>
-               </dependency>
-               <dependency>
-                  <groupId>io.vertx</groupId>
-                  <artifactId>vertx-hazelcast</artifactId>
-                  <version>${vertx.version}</version>
-               </dependency>
-            </dependencies>
-            <executions>
-               <execution>
-                  <id>PullInDeps</id>
-                  <phase>prepare-package</phase>
-                  <goals>
-                     <goal>pullInDeps</goal>
-                  </goals>
-               </execution>
-            </executions>
-         </plugin>
-
-         <!-- Other plugins required by the build -->
-         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>${maven.compiler.plugin.version}</version>
-            <configuration>
-               <source>1.8</source>
-               <target>1.8</target>
-            </configuration>
-         </plugin>
-         <plugin>
-            <artifactId>maven-resources-plugin</artifactId>
-            <version>${maven.resources.plugin.version}</version>
-            <executions>
-               <execution>
-                  <id>copy-mod-to-target</id>
-                  <phase>process-classes</phase>
-                  <goals>
-                     <goal>copy-resources</goal>
-                  </goals>
-                  <configuration>
-                     <overwrite>true</overwrite>
-                     <outputDirectory>${mods.directory}/${module.name}</outputDirectory>
-                     <resources>
-                        <resource>
-                           <directory>target/classes</directory>
-                        </resource>
-                     </resources>
-                  </configuration>
-               </execution>
-            </executions>
-         </plugin>
-         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <version>${maven.dependency.plugin.version}</version>
-            <executions>
-               <execution>
-                  <id>copy-mod-dependencies-to-target</id>
-                  <phase>process-classes</phase>
-                  <goals>
-                     <goal>copy-dependencies</goal>
-                  </goals>
-                  <configuration>
-                     <outputDirectory>${mods.directory}/${module.name}/lib</outputDirectory>
-                     <includeScope>runtime</includeScope>
-                  </configuration>
-               </execution>
-               <execution>
-                  <id>copy-mod-dependencies-to-target-dependencies</id>
-                  <phase>process-classes</phase>
-                  <goals>
-                     <goal>copy-dependencies</goal>
-                  </goals>
-                  <configuration>
-                     <outputDirectory>target/dependencies</outputDirectory>
-                     <includeScope>runtime</includeScope>
-                  </configuration>
-               </execution>
-            </executions>
-         </plugin>
-         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <version>${maven.surefire.plugin.version}</version>
-            <configuration>
-               <includes>
-                  <include>**/unit/*Test*.java</include>
-               </includes>
-            </configuration>
-         </plugin>
-         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-failsafe-plugin</artifactId>
-            <version>${maven.failsafe.plugin.version}</version>
-            <configuration>
-               <systemProperties>
-                  <property>
-                     <name>vertx.mods</name>
-                     <value>${mods.directory}</value>
-                  </property>
-               </systemProperties>
-               <includes>
-                  <include>**/integration/**/*Test*</include>
-               </includes>
-            </configuration>
-            <executions>
-               <execution>
-                  <goals>
-                     <goal>integration-test</goal>
-                     <goal>verify</goal>
-                  </goals>
-               </execution>
-            </executions>
-         </plugin>
-         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-report-plugin</artifactId>
-            <version>${maven.surefire.report.plugin.version}</version>
-            <executions>
-               <execution>
-                  <id>generate-test-report</id>
-                  <phase>test</phase>
-                  <goals>
-                     <goal>report-only</goal>
-                  </goals>
-               </execution>
-               <execution>
-                  <id>generate-integration-test-report</id>
-                  <phase>integration-test</phase>
-                  <goals>
-                     <goal>failsafe-report-only</goal>
-                  </goals>
-               </execution>
-            </executions>
-         </plugin>
-         <plugin>
-            <artifactId>maven-assembly-plugin</artifactId>
-            <configuration>
-               <descriptors>
-                  <descriptor>src/main/assembly/mod.xml</descriptor>
-               </descriptors>
-            </configuration>
-            <executions>
-               <execution>
-                  <id>assemble</id>
-                  <phase>package</phase>
-                  <goals>
-                     <goal>single</goal>
-                  </goals>
-               </execution>
-            </executions>
-         </plugin>
+                                      <!-- Alternatively if you just want to run your own main then specify it here as follows:
+                                      <Main-Class>your.main.Class</Main-Class>
+                                      -->
+                                  </manifestEntries>
+                              </transformer>
+                              <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                  <resource>META-INF/services/io.vertx.core.spi.VerticleFactory</resource>
+                              </transformer>
+                          </transformers>
+                          <artifactSet>
+                              <!-- By default all the deps go into the fat jar, but we don't need some so we can exclude them
+                              here -->
+                              <excludes>
+                                  <exclude>io.vertx:codegen</exclude>
+                                  <exclude>junit:junit</exclude>
+                                  <exclude>org.mvel:mvel2</exclude>
+                                  <exclude>log4j:log4j</exclude>
+                                  <exclude>org.slf4j:slf4j-api</exclude>
+                              </excludes>
+                          </artifactSet>
+                          <outputFile>${project.build.directory}/${artifactId}-${version}-fat.jar</outputFile>
+                      </configuration>
+                  </execution>
+              </executions>
+          </plugin>
       </plugins>
    </build>
    <reporting>
