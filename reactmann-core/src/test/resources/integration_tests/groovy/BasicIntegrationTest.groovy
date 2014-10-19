@@ -2,7 +2,6 @@
  * Simple integration test which shows tests deploying other verticles, using the Vert.x API etc
  */
 
-import reactmann.integration.java.SomeVerticle
 
 import static org.vertx.testtools.VertxAssert.*
 
