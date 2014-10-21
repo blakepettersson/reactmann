@@ -9,6 +9,8 @@ import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.http.impl.ws.WebSocketFrameImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.core.net.NetServer;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.streams.WriteStream;
@@ -23,15 +25,26 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 public class TcpMessageVerticle extends AbstractVerticle {
+    Logger log = LoggerFactory.getLogger(TcpMessageVerticle.class);
+
     public void start() {
-
-        NetServer netServer = vertx.createNetServer(new NetServerOptions().setPort(5555));
         ObservableFuture<NetServer> foo = RxHelper.observableFuture();
-        netServer.listen(foo);
+        NetServer netServer = vertx.createNetServer(new NetServerOptions().setPort(5555));
+        foo.subscribe(a -> {
+        }, e -> {
 
-        HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(5556));
+        }, () -> {
+
+        });
+
         ObservableFuture<HttpServer> bla = RxHelper.observableFuture();
-        httpServer.listen(bla);
+        HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(5556));
+        bla.subscribe(a -> {
+        }, e -> {
+
+        }, () -> {
+
+        });
 
         RxHelper.toObservable(httpServer.websocketStream()).map(s -> {
             try {
@@ -58,12 +71,9 @@ public class TcpMessageVerticle extends AbstractVerticle {
 
             socket.closeHandler(h -> subscription.unsubscribe());
         }, e -> {
-
-            //container.logger().error(e);
-
+            log.error(e);
             //TODO: Fix proper error handling
         });
-
 
 
         RxHelper.toObservable(netServer.connectStream())
@@ -72,13 +82,15 @@ public class TcpMessageVerticle extends AbstractVerticle {
                     sendResponse(Proto.Msg.newBuilder().setOk(true).build(), s.getLeft());
                     vertx.eventBus().publish("riemann.stream", s.getRight().toByteArray());
                 }, e -> {
-                    //container.logger().error(e);
+                    log.error(e);
 
                     if (e instanceof NetSocketException) {
                         sendResponse(Proto.Msg.newBuilder().setError(e.getMessage()).build(), ((NetSocketException) e).getSocket());
                     }
                 });
 
+        netServer.listen(foo);
+        httpServer.listen(bla);
         //container.logger().info("Started TCP listener at port 5555");
     }
 
