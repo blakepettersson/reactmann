@@ -41,6 +41,19 @@ public class Event {
         return new Event(event.getHost(), event.getService(), event.getState(), event.getDescription(), event.getTagsList(), event.getTime(), event.getTtl(), metric);
     }
 
+    public Proto.Event toProtoBufEvent() {
+        return Proto.Event.newBuilder()
+                .setDescription(description)
+                .setHost(host)
+                .setMetricD(metric)
+                .setService(service)
+                .setTime(time)
+                .setTtl(ttl)
+                .setState(state)
+                .addAllTags(tags)
+                .build();
+    }
+
     public double getMetric() {
         return metric;
     }
