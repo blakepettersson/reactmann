@@ -9,7 +9,9 @@ import rx.Observable;
 public abstract class RiemannVerticle extends AbstractVerticle {
     @Override
     public void start() {
-        vertx.deployVerticle("java:reactmann.TcpMessageVerticle", event -> observeStream(Riemann.getEvents(vertx)));
+        vertx.deployVerticle("java:" + WebSocketVerticle.class.getName(), webSocketCallback -> {
+            vertx.deployVerticle("java:" + TcpMessageVerticle.class.getName(), tcpMessageCallback -> observeStream(Riemann.getEvents(vertx)));
+        });
     }
 
     public abstract void observeStream(Observable<Event> events);
