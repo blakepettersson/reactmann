@@ -5,7 +5,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.streams.WriteStream;
-import io.vertx.ext.rxjava.RxHelper;
+import io.vertx.ext.rx.java.RxHelper;
 import rx.Observable;
 
 import java.util.ArrayList;

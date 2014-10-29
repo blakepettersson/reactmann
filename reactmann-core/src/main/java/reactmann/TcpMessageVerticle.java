@@ -14,8 +14,8 @@ import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.core.net.NetServer;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.streams.WriteStream;
-import io.vertx.ext.rxjava.ObservableFuture;
-import io.vertx.ext.rxjava.RxHelper;
+import io.vertx.ext.rx.java.ObservableHandler;
+import io.vertx.ext.rx.java.RxHelper;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import rx.Subscription;
@@ -28,7 +28,7 @@ public class TcpMessageVerticle extends AbstractVerticle {
     Logger log = LoggerFactory.getLogger(TcpMessageVerticle.class);
 
     public void start() {
-        ObservableFuture<NetServer> foo = RxHelper.observableFuture();
+        ObservableHandler<NetServer> foo = RxHelper.observableHandler();
         NetServer netServer = vertx.createNetServer(new NetServerOptions().setPort(5555));
         foo.subscribe(a -> {
         }, e -> {
@@ -37,7 +37,7 @@ public class TcpMessageVerticle extends AbstractVerticle {
 
         });
 
-        ObservableFuture<HttpServer> bla = RxHelper.observableFuture();
+        ObservableHandler<HttpServer> bla = RxHelper.observableHandler();
         HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(5556));
         bla.subscribe(a -> {
         }, e -> {
@@ -58,15 +58,18 @@ public class TcpMessageVerticle extends AbstractVerticle {
             ServerWebSocket socket = r.getLeft();
             Subscription subscription = Riemann.getEvents(vertx)
                     .filter(r.getRight())
-                    .map(e -> new JsonObject()
-                            .putArray("tags", new JsonArray(e.getTags().toArray()))
-                            .putString("host", e.getHost())
-                            .putString("state", e.getState())
-                            .putString("service", e.getService())
-                            .putString("description", e.getDescription())
-                            .putNumber("metric", e.getMetric())
-                            .putNumber("time", e.getTime())
-                            .putNumber("ttl", e.getTtl()))
+                    .map(e -> {
+                          return new JsonObject()
+                             .put("tags", new JsonArray().add(e.getTags().toArray()))
+                             .put("host", e.getHost())
+                             .put("state", e.getState())
+                             .put("service", e.getService())
+                             .put("description", e.getDescription())
+                             .put("metric", e.getMetric())
+                             .put("time", e.getTime())
+                             .put("ttl", e.getTtl());
+                       }
+                    )
                     .subscribe(json -> socket.writeFrame(new WebSocketFrameImpl(json.encode())));
 
             socket.closeHandler(h -> subscription.unsubscribe());
@@ -89,8 +92,8 @@ public class TcpMessageVerticle extends AbstractVerticle {
                     }
                 });
 
-        netServer.listen(foo);
-        httpServer.listen(bla);
+        netServer.listen(foo.asHandler());
+        httpServer.listen(bla.asHandler());
         //container.logger().info("Started TCP listener at port 5555");
     }
 
