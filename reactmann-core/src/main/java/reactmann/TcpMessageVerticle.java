@@ -8,14 +8,14 @@ import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.core.net.NetServer;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.streams.WriteStream;
-import io.vertx.ext.rx.java.ObservableHandler;
-import io.vertx.ext.rx.java.RxHelper;
+import io.vertx.rx.java.ObservableFuture;
+import io.vertx.rx.java.RxHelper;
 
 public class TcpMessageVerticle extends AbstractVerticle {
     private static final Logger log = LoggerFactory.getLogger(TcpMessageVerticle.class);
 
     public void start() {
-        ObservableHandler<NetServer> netServerObservable = RxHelper.observableHandler();
+        ObservableFuture<NetServer> netServerObservable = RxHelper.observableFuture();
         NetServer netServer = vertx.createNetServer(new NetServerOptions().setPort(5555));
         netServerObservable.subscribe(a -> {
             log.info("Started TCP listener at port 5555");

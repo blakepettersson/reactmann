@@ -9,8 +9,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.impl.LoggerFactory;
-import io.vertx.ext.rx.java.ObservableHandler;
-import io.vertx.ext.rx.java.RxHelper;
+import io.vertx.rx.java.ObservableFuture;
+import io.vertx.rx.java.RxHelper;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import rx.Subscription;
@@ -27,7 +27,7 @@ public class WebSocketVerticle extends AbstractVerticle {
 
     @Override
     public void start() throws Exception {
-        ObservableHandler<HttpServer> httpServerObservable = RxHelper.observableHandler();
+        ObservableFuture<HttpServer> httpServerObservable = RxHelper.observableFuture();
         HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(5556));
         httpServerObservable.subscribe(a -> {
             log.info("Started web socket listener at port 5556");
