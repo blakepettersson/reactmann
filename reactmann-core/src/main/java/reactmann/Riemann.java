@@ -34,8 +34,9 @@ public class Riemann {
         Observable.OnSubscribe<Buffer> bufferUntilEverythingHasBeenReceived = (subscriber) -> observable.subscribe(buffer -> {
             buffers.add(buffer);
             long size = buffers.stream().mapToLong(Buffer::length).sum();
-            if (buffers.get(0).getInt(0) + 4 == size) {
-                subscriber.onNext(buffers.stream().reduce(Buffer.buffer(), (a, b) -> a.appendBuffer(b)));
+            int expectedSize = buffers.get(0).getInt(0);
+            if (expectedSize + 4 == size) {
+                subscriber.onNext(buffers.stream().reduce(Buffer.buffer(), Buffer::appendBuffer));
                 buffers.clear();
             }
         });
