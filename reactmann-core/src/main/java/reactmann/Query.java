@@ -80,7 +80,7 @@ public class Query {
             case "metric_f":
                 return event.getMetric();
             case "metric":
-                return event.getMetric();
+                return Math.round(event.getMetric());
             case "time":
                 return event.getTime();
             case "ttl":
