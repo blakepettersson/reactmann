@@ -12,16 +12,6 @@ import reactmann.Tup2;
  */
 public class IndexTest extends VertxTestBase {
 
-    /*
-    public void start() {
-        // Make sure we call initialize() - this sets up the assert stuff so assert functionality works correctly
-        initialize();
-        startTests();
-    }*/
-
-
-    //TODO: Fix test with vertx 3.0
-
     @Test
     public void testRemove() {
         Index index = new Index(vertx);
@@ -30,7 +20,6 @@ public class IndexTest extends VertxTestBase {
         assertEquals(1, index.size());
         index.remove(key);
         assertEquals(0, index.size());
-        testComplete();
     }
 
     @Test
@@ -48,6 +37,8 @@ public class IndexTest extends VertxTestBase {
         assertEquals(1, index.size());
         index.remove(key);
         assertEquals(0, index.size());
+
+        await();
     }
 
     @Test
@@ -59,6 +50,8 @@ public class IndexTest extends VertxTestBase {
             assertEquals(0, index.size());
             testComplete();
         });
+
+        await();
     }
 
     @Test
@@ -73,6 +66,8 @@ public class IndexTest extends VertxTestBase {
 
         index.put(Tup2.create("test", "test"), new Event("test", "test", "hello", "", null, System.currentTimeMillis(), 2, 1.0));
         assertEquals(1, index.size());
+
+        await();
     }
 
 }

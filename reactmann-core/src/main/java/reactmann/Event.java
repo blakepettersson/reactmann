@@ -2,6 +2,7 @@ package reactmann;
 
 import com.aphyr.riemann.Proto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,7 +23,7 @@ public class Event {
         this.service = service;
         this.state = state;
         this.description = description;
-        this.tags = tags;
+        this.tags = tags == null ? new ArrayList<>() : tags;
         this.time = time;
         this.ttl = ttl;
         this.metric = metric;
