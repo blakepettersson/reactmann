@@ -25,9 +25,7 @@ public class RiemannTest extends VertxTestBase {
             testComplete();
         });
 
-        Proto.Msg.Builder builder = Proto.Msg.newBuilder(Proto.Msg.getDefaultInstance()).addEvents(event.toProtoBufEvent());
-
-        vertx.eventBus().send("riemann.stream", builder.build().toByteArray());
+        vertx.eventBus().send("riemann.stream", event.toProtoBufMessage().toByteArray());
 
         await();
     }
@@ -35,7 +33,7 @@ public class RiemannTest extends VertxTestBase {
     @Test
     public void testConvertBufferStreamToMessages() {
         Event event = new Event("test", "test", "test", "test", null, 1, 1.0F, 1.0);
-        byte[] bytes = Proto.Msg.newBuilder(Proto.Msg.getDefaultInstance()).addEvents(event.toProtoBufEvent()).build().toByteArray();
+        byte[] bytes = event.toProtoBufMessage().toByteArray();
 
         Riemann.convertBufferStreamToMessages(mock(NetSocket.class), Observable.just(
                 Buffer.buffer().appendInt(bytes.length),

@@ -42,6 +42,10 @@ public class Event {
         return new Event(event.getHost(), event.getService(), event.getState(), event.getDescription(), event.getTagsList(), event.getTime(), event.getTtl(), metric);
     }
 
+    public Proto.Msg toProtoBufMessage() {
+        return Proto.Msg.newBuilder(Proto.Msg.getDefaultInstance()).addEvents(this.toProtoBufEvent()).build();
+    }
+
     public Proto.Event toProtoBufEvent() {
         return Proto.Event.newBuilder()
                 .setDescription(description)
@@ -134,7 +138,7 @@ public class Event {
         result = 31 * result + (service != null ? service.hashCode() : 0);
         result = 31 * result + (state != null ? state.hashCode() : 0);
         result = 31 * result + (description != null ? description.hashCode() : 0);
-        result = 31 * result + (tags != null ? tags.hashCode() : 0);
+        result = 31 * result + (tags.hashCode());
         result = 31 * result + (int) (time ^ (time >>> 32));
         result = 31 * result + (ttl != +0.0f ? Float.floatToIntBits(ttl) : 0);
         temp = Double.doubleToLongBits(metric);
