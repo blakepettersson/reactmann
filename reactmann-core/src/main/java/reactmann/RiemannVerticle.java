@@ -1,25 +1,25 @@
 package reactmann;
 
-import org.vertx.java.platform.Verticle;
+import io.vertx.core.AbstractVerticle;
 import rx.Observable;
 
 /**
  * @author blake
  */
-public abstract class RiemannVerticle extends Verticle {
-   private Index index;
+public abstract class RiemannVerticle extends AbstractVerticle {
+    private Index index;
 
-   @Override
-   public void start() {
-      container.deployModule("reactmann~reactmann-core~1.0-SNAPSHOT", event -> {
-         index = new Index(vertx);
-         observeStream(Riemann.getEvents(vertx));
-      });
-   }
+    @Override
+    public void start() {
+        vertx.deployVerticle("java:" + WebSocketVerticle.class.getName(), webSocketCallback -> {
+            vertx.deployVerticle("java:" + TcpMessageVerticle.class.getName(), tcpMessageCallback -> observeStream(Riemann.getEvents(vertx)));
+            index = new Index(vertx);
+        });
+    }
 
-   public void index(Event event) {
-      index.put(Tup2.create(event.getHost(), event.getService()), event);
-   }
+    public void index(Event event) {
+        index.put(Tup2.create(event.getHost(), event.getService()), event);
+    }
 
-   public abstract void observeStream(Observable<Event> events);
+    public abstract void observeStream(Observable<Event> events);
 }

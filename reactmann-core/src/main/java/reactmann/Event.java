@@ -1,7 +1,6 @@
 package reactmann;
 
 import com.aphyr.riemann.Proto;
-import org.vertx.java.core.shareddata.Shareable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,151 +8,155 @@ import java.util.List;
 /**
  * @author blake
  */
-public class Event implements Shareable {
-   private final String host;
-   private final String service;
-   private final String state;
-   private final String description;
-   private final List<String> tags;
-   private final long time;
-   private final float ttl;
-   private final double metric;
+public class Event {
+    private final String host;
+    private final String service;
+    private final String state;
+    private final String description;
+    private final List<String> tags;
+    private final long time;
+    private final float ttl;
+    private final double metric;
 
-   public Event(String host, String service, String state, String description, List<String> tags, long time, float ttl, double metric) {
-      this.host = host;
-      this.service = service;
-      this.state = state;
-      this.description = description;
-      this.tags = tags != null ? tags : new ArrayList<>();
-      this.time = time;
-      this.ttl = ttl;
-      this.metric = metric;
-   }
+    public Event(String host, String service, String state, String description, List<String> tags, long time, float ttl, double metric) {
+        this.host = host;
+        this.service = service;
+        this.state = state;
+        this.description = description;
+        this.tags = tags == null ? new ArrayList<>() : tags;
+        this.time = time;
+        this.ttl = ttl;
+        this.metric = metric;
+    }
 
-   public static Event fromProtoBufEvent(Proto.Event event) {
-      double metric;
-      if (event.hasMetricD()) {
-         metric = event.getMetricD();
-      } else if (event.hasMetricF()) {
-         metric = event.getMetricF();
-      } else {
-         metric = event.getMetricSint64();
-      }
+    public static Event fromProtoBufEvent(Proto.Event event) {
+        double metric;
+        if (event.hasMetricD()) {
+            metric = event.getMetricD();
+        } else if (event.hasMetricF()) {
+            metric = event.getMetricF();
+        } else {
+            metric = event.getMetricSint64();
+        }
 
-      return new Event(event.getHost(), event.getService(), event.getState(), event.getDescription(), event.getTagsList(), event.getTime(), event.getTtl(), metric);
-   }
+        return new Event(event.getHost(), event.getService(), event.getState(), event.getDescription(), event.getTagsList(), event.getTime(), event.getTtl(), metric);
+    }
 
-   public Proto.Event toProtoBufEvent() {
-      return Proto.Event.newBuilder()
-         .setDescription(description)
-         .setHost(host)
-         .setMetricD(metric)
-         .setService(service)
-         .setTime(time)
-         .setTtl(ttl)
-         .setState(state)
-         .addAllTags(tags)
-         .build();
-   }
+    public Proto.Msg toProtoBufMessage() {
+        return Proto.Msg.newBuilder(Proto.Msg.getDefaultInstance()).addEvents(this.toProtoBufEvent()).build();
+    }
 
-   public double getMetric() {
-      return metric;
-   }
+    public Proto.Event toProtoBufEvent() {
+        return Proto.Event.newBuilder()
+                .setDescription(description)
+                .setHost(host)
+                .setMetricD(metric)
+                .setService(service)
+                .setTime(time)
+                .setTtl(ttl)
+                .setState(state)
+                .addAllTags(tags)
+                .build();
+    }
 
-   public float getTtl() {
-      return ttl;
-   }
+    public double getMetric() {
+        return metric;
+    }
 
-   public long getTime() {
-      return time;
-   }
+    public float getTtl() {
+        return ttl;
+    }
 
-   public List<String> getTags() {
-      return tags;
-   }
+    public long getTime() {
+        return time;
+    }
 
-   public String getDescription() {
-      return description;
-   }
+    public List<String> getTags() {
+        return tags;
+    }
 
-   public String getState() {
-      return state;
-   }
+    public String getDescription() {
+        return description;
+    }
 
-   public String getService() {
-      return service;
-   }
+    public String getState() {
+        return state;
+    }
 
-   public String getHost() {
-      return host;
-   }
+    public String getService() {
+        return service;
+    }
 
-   @Override
-   public boolean equals(Object o) {
-      if (this == o) {
-         return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-         return false;
-      }
+    public String getHost() {
+        return host;
+    }
 
-      Event event = (Event) o;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
-      if (Double.compare(event.metric, metric) != 0) {
-         return false;
-      }
-      if (time != event.time) {
-         return false;
-      }
-      if (Float.compare(event.ttl, ttl) != 0) {
-         return false;
-      }
-      if (description != null ? !description.equals(event.description) : event.description != null) {
-         return false;
-      }
-      if (host != null ? !host.equals(event.host) : event.host != null) {
-         return false;
-      }
-      if (service != null ? !service.equals(event.service) : event.service != null) {
-         return false;
-      }
-      if (state != null ? !state.equals(event.state) : event.state != null) {
-         return false;
-      }
-      if (tags != null ? !tags.equals(event.tags) : event.tags != null) {
-         return false;
-      }
+        Event event = (Event) o;
 
-      return true;
-   }
+        if (Double.compare(event.metric, metric) != 0) {
+            return false;
+        }
+        if (time != event.time) {
+            return false;
+        }
+        if (Float.compare(event.ttl, ttl) != 0) {
+            return false;
+        }
+        if (description != null ? !description.equals(event.description) : event.description != null) {
+            return false;
+        }
+        if (host != null ? !host.equals(event.host) : event.host != null) {
+            return false;
+        }
+        if (service != null ? !service.equals(event.service) : event.service != null) {
+            return false;
+        }
+        if (state != null ? !state.equals(event.state) : event.state != null) {
+            return false;
+        }
+        if (tags != null ? !tags.equals(event.tags) : event.tags != null) {
+            return false;
+        }
 
-   @Override
-   public int hashCode() {
-      int result;
-      long temp;
-      result = host != null ? host.hashCode() : 0;
-      result = 31 * result + (service != null ? service.hashCode() : 0);
-      result = 31 * result + (state != null ? state.hashCode() : 0);
-      result = 31 * result + (description != null ? description.hashCode() : 0);
-      result = 31 * result + (tags != null ? tags.hashCode() : 0);
-      result = 31 * result + (int) (time ^ (time >>> 32));
-      result = 31 * result + (ttl != +0.0f ? Float.floatToIntBits(ttl) : 0);
-      temp = Double.doubleToLongBits(metric);
-      result = 31 * result + (int) (temp ^ (temp >>> 32));
-      return result;
-   }
+        return true;
+    }
 
-   @Override
-   public String toString() {
-      return "Event{" +
-         "host='" + host + '\'' +
-         ", service='" + service + '\'' +
-         ", state='" + state + '\'' +
-         ", description='" + description + '\'' +
-         ", tags=" + tags +
-         ", time=" + time +
-         ", ttl=" + ttl +
-         ", metric=" + metric +
-         '}';
-   }
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        result = host != null ? host.hashCode() : 0;
+        result = 31 * result + (service != null ? service.hashCode() : 0);
+        result = 31 * result + (state != null ? state.hashCode() : 0);
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (tags.hashCode());
+        result = 31 * result + (int) (time ^ (time >>> 32));
+        result = 31 * result + (ttl != +0.0f ? Float.floatToIntBits(ttl) : 0);
+        temp = Double.doubleToLongBits(metric);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Event{" +
+                "host='" + host + '\'' +
+                ", service='" + service + '\'' +
+                ", state='" + state + '\'' +
+                ", description='" + description + '\'' +
+                ", tags=" + tags +
+                ", time=" + time +
+                ", ttl=" + ttl +
+                ", metric=" + metric +
+                '}';
+    }
 }
