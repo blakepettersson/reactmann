@@ -5,7 +5,8 @@
     <artifactId>reactmann-java-archetype</artifactId>
     <packaging>jar</packaging>
     <name>Reactmann Java Archetype</name>
-    <url>http://maven.apache.org</url>
+    <description>A default archetype to create Reactmann verticles with.</description>
+    <url>https://github.com/blakepettersson/reactmann</url>
 
     <parent>
         <groupId>reactmann</groupId>

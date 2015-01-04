@@ -8,8 +8,31 @@
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <name>Reactmann Parent</name>
-    <url>http://maven.apache.org</url>
+    <url>https://github.com/blakepettersson/reactmann</url>
+    <description>A Riemann inspired monitoring system using vert.x and rxjava.</description>
 
+    <licenses>
+        <license>
+            <name>Eclipse Public License - v 1.0</name>
+            <url>http://www.eclipse.org/legal/epl-v10.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:git@github.com:blakepettersson/reactmann.git</connection>
+        <developerConnection>scm:git:git@github.com:blakepettersson/reactmann.git</developerConnection>
+        <url>git@github.com:blakepettersson/reactmann.git</url>
+    </scm>
+
+    <developers>
+        <developer>
+            <name>Blake Pettersson</name>
+            <email>N/A</email>
+            <organization>reactmann</organization>
+            <organizationUrl>https://github.com/blakepettersson</organizationUrl>
+        </developer>
+    </developers>
 
     <parent>
         <groupId>org.sonatype.oss</groupId>
