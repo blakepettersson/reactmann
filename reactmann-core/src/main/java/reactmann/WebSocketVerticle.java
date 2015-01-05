@@ -11,13 +11,8 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.rx.java.ObservableFuture;
 import io.vertx.rx.java.RxHelper;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
+import reactmann.observables.EventObservable;
 import rx.Subscription;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
 
 /**
  * @author blake
@@ -37,15 +32,7 @@ public class WebSocketVerticle extends AbstractVerticle {
 
         });
 
-        RxHelper.toObservable(httpServer.websocketStream()).map(s -> {
-            try {
-                List<NameValuePair> query = URLEncodedUtils.parse(new URI(s.uri()), "UTF-8");
-                NameValuePair nameValuePair = query.stream().filter(p -> "query".equals(p.getName())).findAny().get();
-                return Tup2.create(s, Query.parse(nameValuePair.getValue()));
-            } catch (URISyntaxException e) {
-                throw new NetSocketException(s, e);
-            }
-        }).subscribe(r -> {
+        EventObservable.convertFromWebSocketObservable(RxHelper.toObservable(httpServer.websocketStream())).subscribe(r -> {
             ServerWebSocket socket = r.getLeft();
             Subscription subscription = Riemann.getEvents(vertx)
                     .filter(r.getRight())
