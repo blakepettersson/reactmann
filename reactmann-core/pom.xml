@@ -10,7 +10,7 @@
     <url>https://github.com/blakepettersson/reactmann</url>
 
     <parent>
-        <groupId>reactmann</groupId>
+        <groupId>com.github.blakepettersson</groupId>
         <artifactId>reactmann</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
