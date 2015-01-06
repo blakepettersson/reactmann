@@ -22,15 +22,16 @@ public class WebSocketVerticle extends AbstractVerticle {
 
     @Override
     public void start() throws Exception {
+        //TODO: Fix a better way of configuration other than system properties?
+        Integer port = Integer.getInteger("websocket.port", 5556);
+
         ObservableFuture<HttpServer> httpServerObservable = RxHelper.observableFuture();
-        HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(5556));
-        httpServerObservable.subscribe(a -> {
-            log.info("Started web socket listener at port 5556");
-        }, e -> {
-
-        }, () -> {
-
-        });
+        HttpServer httpServer = vertx.createHttpServer(new HttpServerOptions().setPort(port));
+        httpServerObservable.subscribe(
+                a -> log.info("Starting web socket listener..."),
+                e -> log.error("Could not start web socket listener at port " + port, e),
+                () -> log.info("Started web socket listener on port " + port)
+        );
 
         Observable<Tup2<ServerWebSocket, Func1<Event, Boolean>>> eventObservable = EventObservable.convertFromWebSocketObservable(RxHelper.toObservable(httpServer.websocketStream()));
         eventObservable.subscribe(new EventToJsonAction(Riemann.getEvents(vertx), WebSocketFrameImpl::new), e -> {

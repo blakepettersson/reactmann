@@ -15,15 +15,16 @@ public class TcpMessageVerticle extends AbstractVerticle {
     private static final Logger log = LoggerFactory.getLogger(TcpMessageVerticle.class);
 
     public void start() {
+        //TODO: Fix a better way of configuration other than system properties?
+        Integer port = Integer.getInteger("tcp.port", 5555);
+
         ObservableFuture<NetServer> netServerObservable = RxHelper.observableFuture();
-        NetServer netServer = vertx.createNetServer(new NetServerOptions().setPort(5555));
-        netServerObservable.subscribe(a -> {
-            log.info("Started TCP listener at port 5555");
-        }, e -> {
-
-        }, () -> {
-
-        });
+        NetServer netServer = vertx.createNetServer(new NetServerOptions().setPort(port));
+        netServerObservable.subscribe(a ->
+                log.info("Starting TCP listener.."),
+                e -> log.error("Could not start TCP listener on port " + port, e),
+                () -> log.info("Started TCP listener on port " + port + ".")
+        );
 
         RxHelper.toObservable(netServer.connectStream())
                 .flatMap(s -> Riemann.convertBufferStreamToMessages(s, RxHelper.toObservable(s)))
