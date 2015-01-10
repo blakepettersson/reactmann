@@ -89,7 +89,7 @@ public class Index implements ConcurrentMap<Tup2<String, String>, Event> {
 
         Event remove = map.remove(key);
 
-        Event expired = new Event(remove.getHost(), remove.getService(), "expired", remove.getDescription(), remove.getTags(), remove.getTime(),
+        Event expired = new Event(remove.getHost(), remove.getService(), "expired", remove.getDescription(), remove.getTags(), remove.getAttributes(), remove.getTime(),
                 remove.getTtl(), remove.getMetric());
 
         Proto.Event value = expired.toProtoBufEvent();

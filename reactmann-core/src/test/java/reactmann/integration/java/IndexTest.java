@@ -16,7 +16,7 @@ public class IndexTest extends VertxTestBase {
     public void testRemove() {
         Index index = new Index(vertx);
         Tup2<String, String> key = Tup2.create("test", "test");
-        index.put(key, new Event("test", "test", "hello", "", null, System.currentTimeMillis(), Integer.MAX_VALUE, 1.0));
+        index.put(key, new Event("test", "test", "hello", "", null, null, System.currentTimeMillis(), Integer.MAX_VALUE, 1.0));
         assertEquals(1, index.size());
         index.remove(key);
         assertEquals(0, index.size());
@@ -33,7 +33,7 @@ public class IndexTest extends VertxTestBase {
         });
 
         Tup2<String, String> key = Tup2.create("test", "test");
-        index.put(key, new Event("test", "test", "hello", "", null, System.currentTimeMillis(), Integer.MAX_VALUE, 1.0));
+        index.put(key, new Event("test", "test", "hello", "", null, null, System.currentTimeMillis(), Integer.MAX_VALUE, 1.0));
         assertEquals(1, index.size());
         index.remove(key);
         assertEquals(0, index.size());
@@ -44,7 +44,7 @@ public class IndexTest extends VertxTestBase {
     @Test
     public void testPutWithTtl() {
         Index index = new Index(vertx);
-        index.put(Tup2.create("test", "test"), new Event("test", "test", "hello", "", null, System.currentTimeMillis(), 5, 1.0));
+        index.put(Tup2.create("test", "test"), new Event("test", "test", "hello", "", null, null, System.currentTimeMillis(), 5, 1.0));
         assertEquals(1, index.size());
         vertx.setTimer(10, (l) -> {
             assertEquals(0, index.size());
@@ -64,7 +64,7 @@ public class IndexTest extends VertxTestBase {
             testComplete();
         });
 
-        index.put(Tup2.create("test", "test"), new Event("test", "test", "hello", "", null, System.currentTimeMillis(), 2, 1.0));
+        index.put(Tup2.create("test", "test"), new Event("test", "test", "hello", "", null, null, System.currentTimeMillis(), 2, 1.0));
         assertEquals(1, index.size());
 
         await();

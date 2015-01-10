@@ -9,17 +9,15 @@ import reactmann.Event;
 import reactmann.Riemann;
 import rx.Observable;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
 public class RiemannTest extends VertxTestBase {
     @Test
     public void testGetEvents() {
-        Event event = new Event("test", "test", "test", "test", null, 1, 1.0F, 1.0);
+        Event event = new Event("test", "test", "test", "test", null, null, 1, 1.0F, 1.0);
         Riemann.getEvents(vertx).forEach(e -> {
             assertEquals(e, event);
             testComplete();
@@ -32,7 +30,7 @@ public class RiemannTest extends VertxTestBase {
 
     @Test
     public void testConvertBufferStreamToMessages() {
-        Event event = new Event("test", "test", "test", "test", null, 1, 1.0F, 1.0);
+        Event event = new Event("test", "test", "test", "test", null, null, 1, 1.0F, 1.0);
         byte[] bytes = event.toProtoBufMessage().toByteArray();
 
         Riemann.convertBufferStreamToMessages(mock(NetSocket.class), Observable.just(

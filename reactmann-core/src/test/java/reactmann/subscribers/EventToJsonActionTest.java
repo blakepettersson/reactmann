@@ -19,7 +19,7 @@ public class EventToJsonActionTest {
     public void testEventAction() {
         WebSocketFrameImpl frame = new WebSocketFrameImpl();
         ServerWebSocket socketMock = mock(ServerWebSocket.class);
-        Event event = new Event("host", "service", "state", "desc", Arrays.asList("blaha"), 1, 1.0F, 1.0D);
+        Event event = new Event("host", "service", "state", "desc", Arrays.asList("blaha"), null, 1, 1.0F, 1.0D);
         new EventToJsonAction(Observable.just(event), s -> {
             assertEquals(s, "{\"tags\":[\"blaha\"],\"host\":\"host\",\"state\":\"state\",\"service\":\"service\",\"description\":\"desc\",\"metric\":1.0,\"time\":1,\"ttl\":1.0}");
             return frame;
