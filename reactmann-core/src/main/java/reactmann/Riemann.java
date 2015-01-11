@@ -6,10 +6,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.streams.WriteStream;
 import io.vertx.rx.java.RxHelper;
+import reactmann.subscribers.BufferAction;
 import rx.Observable;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author blake
@@ -30,18 +28,7 @@ public class Riemann {
     }
 
     public static <T extends WriteStream<Buffer>> Observable<Tup2<T, Proto.Msg>> convertBufferStreamToMessages(T socket, Observable<Buffer> observable) {
-        List<Buffer> buffers = new ArrayList<>();
-        Observable.OnSubscribe<Buffer> bufferUntilEverythingHasBeenReceived = (subscriber) -> observable.subscribe(buffer -> {
-            buffers.add(buffer);
-            long size = buffers.stream().mapToLong(Buffer::length).sum();
-            int expectedSize = buffers.get(0).getInt(0);
-            if (expectedSize + 4 == size) {
-                subscriber.onNext(buffers.stream().reduce(Buffer.buffer(), Buffer::appendBuffer));
-                buffers.clear();
-            }
-        });
-
-        return Observable.create(bufferUntilEverythingHasBeenReceived).map(r -> {
+        return Observable.create(new BufferAction(observable)).map(r -> {
             try {
                 return Proto.Msg.parseFrom(r.getBytes(4, r.length()));
             } catch (Exception e) {
