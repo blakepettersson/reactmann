@@ -10,6 +10,6 @@
     <parent>
         <groupId>com.github.blakepettersson</groupId>
         <artifactId>reactmann</artifactId>
-        <version>0.3-preview</version>
+        <version>0.4-SNAPSHOT</version>
     </parent>
 </project>
