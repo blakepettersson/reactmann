@@ -50,6 +50,12 @@ public class Event {
     }
 
     public Proto.Event toProtoBufEvent() {
+        List<Proto.Attribute> attributeList = attributes
+                .entrySet()
+                .stream()
+                .map(a -> Proto.Attribute.newBuilder().setKey(a.getKey()).setValue(a.getValue()).build())
+                .collect(Collectors.toList());
+
         return Proto.Event.newBuilder()
                 .setDescription(description)
                 .setHost(host)
@@ -59,6 +65,7 @@ public class Event {
                 .setTtl(ttl)
                 .setState(state)
                 .addAllTags(tags)
+                .addAllAttributes(attributeList)
                 .build();
     }
 

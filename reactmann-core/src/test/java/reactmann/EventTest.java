@@ -3,6 +3,8 @@ package reactmann;
 import com.aphyr.riemann.Proto;
 import org.junit.Test;
 
+import java.util.HashMap;
+
 import static org.junit.Assert.*;
 
 public class EventTest {
@@ -20,6 +22,18 @@ public class EventTest {
         assertEquals(expected.getTagsList(), actual.getTagsList());
         assertEquals(expected.getDescription(), actual.getDescription());
         assertEquals(expected.getMetricSint64(), actual.getMetricSint64());
+        assertEquals(expected.getAttributesList(), actual.getAttributesList());
+    }
+
+    @Test
+    public void testToProtoBufEventWithAttributesPresent() {
+        HashMap<String, String> attributes = new HashMap<>();
+        attributes.put("anAttributeKey", "anAttributeValue");
+
+        Proto.Event expected = new Event("", "", "", "", null, attributes, 0, 0.0F, 0.0).toProtoBufEvent();
+        Proto.Event actual = Proto.Event.newBuilder()
+                .addAttributes(Proto.Attribute.newBuilder().setKey("anAttributeKey").setValue("anAttributeValue").build())
+                .build();
         assertEquals(expected.getAttributesList(), actual.getAttributesList());
     }
 
