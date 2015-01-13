@@ -26,7 +26,7 @@ The simplest way to get started, assuming you're using Maven, is to use the java
 mvn archetype:generate                                  \
   -DarchetypeGroupId=com.github.blakepettersson         \
   -DarchetypeArtifactId=reactmann-java-archetype        \
-  -DarchetypeVersion=0.1.1-preview                      \
+  -DarchetypeVersion=0.3-preview                        \
   -DgroupId={your group id}                             \
   -Dversion={your version}                              \
   -DartifactId={your artifact id}
