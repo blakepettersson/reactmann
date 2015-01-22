@@ -39,7 +39,7 @@ public class EventTest {
 
     @Test
     public void testFromProtoBufEvent() {
-        Event event = Event.fromProtoBufEvent(Proto.Event.getDefaultInstance());
+        Event event = Event.builder().fromProtoBufEvent(Proto.Event.getDefaultInstance()).build();
         assertEquals(new Event("", "", "", "", null, null, 0, 0.0F, 0.0), event);
     }
 }

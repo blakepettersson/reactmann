@@ -24,7 +24,7 @@ public class Riemann {
             } catch (InvalidProtocolBufferException e) {
                 throw new RuntimeException(e);
             }
-        }).map(Event::fromProtoBufEvent);
+        }).map(e -> Event.builder().fromProtoBufEvent(e).build());
     }
 
     public static <T extends WriteStream<Buffer>> Observable<Tup2<T, Proto.Msg>> convertBufferStreamToMessages(T socket, Observable<Buffer> observable) {

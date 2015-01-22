@@ -31,18 +31,8 @@ public class Event {
         this.metric = metric;
     }
 
-    public static Event fromProtoBufEvent(Proto.Event event) {
-        double metric;
-        if (event.hasMetricD()) {
-            metric = event.getMetricD();
-        } else if (event.hasMetricF()) {
-            metric = event.getMetricF();
-        } else {
-            metric = event.getMetricSint64();
-        }
-
-        Map<String, String> attributes = event.getAttributesList().stream().collect(Collectors.toMap(k -> k.getKey(), v -> v.getValue()));
-        return new Event(event.getHost(), event.getService(), event.getState(), event.getDescription(), event.getTagsList(), attributes, event.getTime(), event.getTtl(), metric);
+    public static Builder builder() {
+        return new Builder(new Event("", "", "", "", null, null, System.currentTimeMillis(), 1.0F, 1.0));
     }
 
     public Proto.Msg toProtoBufMessage() {
@@ -155,5 +145,59 @@ public class Event {
                 ", ttl=" + ttl +
                 ", metric=" + metric +
                 '}';
+    }
+
+    public static class Builder {
+        private final Event event;
+
+        private Builder(Event event) {
+            this.event = event;
+        }
+
+        public Event build() {
+            return event;
+        }
+
+        public Builder fromProtoBufEvent(Proto.Event event) {
+            double metric;
+            if (event.hasMetricD()) {
+                metric = event.getMetricD();
+            } else if (event.hasMetricF()) {
+                metric = event.getMetricF();
+            } else {
+                metric = event.getMetricSint64();
+            }
+
+            Map<String, String> attributes = event.getAttributesList().stream().collect(Collectors.toMap(k -> k.getKey(), v -> v.getValue()));
+            return new Builder(new Event(event.getHost(), event.getService(), event.getState(), event.getDescription(), event.getTagsList(), attributes, event.getTime(), event.getTtl(), metric));
+        }
+
+        public Builder addTags(String... tags) {
+            return new Builder(new Event(event.getHost(), event.getService(), event.getState(), event.getDescription(), Arrays.asList(tags), event.getAttributes(), event.getTime(), event.getTtl(), event.getMetric()));
+        }
+
+        public Builder withTime(long time) {
+            return new Builder(new Event(event.getHost(), event.getService(), event.getState(), event.getDescription(), event.getTags(), event.getAttributes(), time, event.getTtl(), event.getMetric()));
+        }
+
+        public Builder withHost(String host) {
+            return new Builder(new Event(host, event.getService(), event.getState(), event.getDescription(), event.getTags(), event.getAttributes(), event.getTime(), event.getTtl(), event.getMetric()));
+        }
+
+        public Builder withState(String state) {
+            return new Builder(new Event(event.getHost(), event.getService(), state, event.getDescription(), event.getTags(), event.getAttributes(), event.getTime(), event.getTtl(), event.getMetric()));
+        }
+
+        public Builder withService(String service) {
+            return new Builder(new Event(event.getHost(), service, event.getState(), event.getDescription(), event.getTags(), event.getAttributes(), event.getTime(), event.getTtl(), event.getMetric()));
+        }
+
+        public Builder withDescription(String description) {
+            return new Builder(new Event(event.getHost(), event.getService(), event.getState(), description, event.getTags(), event.getAttributes(), event.getTime(), event.getTtl(), event.getMetric()));
+        }
+
+        public Builder withMetric(double metric) {
+            return new Builder(new Event(event.getHost(), event.getService(), event.getState(), event.getDescription(), event.getTags(), event.getAttributes(), event.getTime(), event.getTtl(), metric));
+        }
     }
 }

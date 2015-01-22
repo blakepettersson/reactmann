@@ -40,7 +40,7 @@ public class RiemannTest extends VertxTestBase {
                 Buffer.buffer().appendBytes(Arrays.copyOfRange(bytes, 22, 42))
         )).forEach(t -> {
             Proto.Event e = t.getRight().getEventsList().get(0);
-            assertEquals(Event.fromProtoBufEvent(e), event);
+            assertEquals(Event.builder().fromProtoBufEvent(e).build(), event);
             testComplete();
         });
 
@@ -69,10 +69,10 @@ public class RiemannTest extends VertxTestBase {
 
         )).buffer(2).forEach(t -> {
             Proto.Event first = t.get(0).getRight().getEventsList().get(0);
-            assertEquals(Event.fromProtoBufEvent(first), event);
+            assertEquals(Event.builder().fromProtoBufEvent(first).build(), event);
 
             Proto.Event second = t.get(1).getRight().getEventsList().get(0);
-            assertEquals(Event.fromProtoBufEvent(second), secondEvent);
+            assertEquals(Event.builder().fromProtoBufEvent(second).build(), secondEvent);
             testComplete();
         });
 

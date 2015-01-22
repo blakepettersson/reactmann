@@ -1,6 +1,5 @@
 package reactmann.observables;
 
-import com.aphyr.riemann.Proto;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
@@ -34,8 +33,8 @@ public class EventObservableTest extends VertxTestBase {
         when(socket.uri()).thenReturn("http://something.com?query=host+%3D+test");
         Observable<Tup2<ServerWebSocket, Func1<Event, Boolean>>> observable = EventObservable.convertFromWebSocketObservable(Observable.just(socket));
         observable.subscribe(t -> {
-            assertEquals(true, t.getRight().call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setHost("test").build())));
-            assertEquals(false, t.getRight().call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setHost("fail").build())));
+            assertEquals(true, t.getRight().call(Event.builder().withHost("test").build()));
+            assertEquals(false, t.getRight().call(Event.builder().withHost("fail").build()));
             testComplete();
         });
 

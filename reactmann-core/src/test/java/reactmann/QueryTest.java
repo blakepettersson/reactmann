@@ -3,106 +3,105 @@ package reactmann;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.aphyr.riemann.Proto;
 import org.junit.Test;
 
 public class QueryTest {
 
    @Test
    public void testFields() {
-      assertTrue(Query.parse("host = true").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setHost("true").build())));
-      assertTrue(Query.parse("state = true").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setState("true").build())));
-      assertTrue(Query.parse("service = true").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setService("true").build())));
-      assertTrue(Query.parse("description = true").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setDescription("true").build())));
+      assertTrue(Query.parse("host = true").call(Event.builder().withHost("true").build()));
+      assertTrue(Query.parse("state = true").call(Event.builder().withState("true").build()));
+      assertTrue(Query.parse("service = true").call(Event.builder().withService("true").build()));
+      assertTrue(Query.parse("description = true").call(Event.builder().withDescription("true").build()));
    }
 
    @Test
    public void testState() throws Exception {
-      assertTrue(Query.parse("state = \"\"").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setState("").build())));
-      assertTrue(Query.parse("state = \"foo\"").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setState("foo").build())));
-      assertTrue(Query.parse("state = \"辻斬\"").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setState("辻斬").build())));
-      assertTrue(Query.parse("state = \"\\b\\t\\n\\f\\r\"").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setState("\b\t\n\f\r").build())));
-      assertTrue(Query.parse("state = \" \\\" \\\\ \"").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setState(" \" \\ ").build())));
+      assertTrue(Query.parse("state = \"\"").call(Event.builder().withState("").build()));
+      assertTrue(Query.parse("state = \"foo\"").call(Event.builder().withState("foo").build()));
+      assertTrue(Query.parse("state = \"辻斬\"").call(Event.builder().withState("辻斬").build()));
+      assertTrue(Query.parse("state = \"\\b\\t\\n\\f\\r\"").call(Event.builder().withState("\b\t\n\f\r").build()));
+      assertTrue(Query.parse("state = \" \\\" \\\\ \"").call(Event.builder().withState(" \" \\ ").build()));
    }
 
    @Test
    public void testInts() throws Exception {
-      assertTrue(Query.parse("metric = 0").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setMetricSint64(0).build())));
-      assertTrue(Query.parse("metric = 1").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setMetricSint64(1).build())));
-      assertTrue(Query.parse("metric = -1").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setMetricSint64(-1).build())));
+      assertTrue(Query.parse("metric = 0").call(Event.builder().withMetric(0).build()));
+      assertTrue(Query.parse("metric = 1").call(Event.builder().withMetric(1).build()));
+      assertTrue(Query.parse("metric = -1").call(Event.builder().withMetric(-1).build()));
    }
 
    @Test
    public void testFloats() throws Exception {
-      assertTrue(Query.parse("metric_f = 1.").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setMetricD(1.0).build())));
-      assertTrue(Query.parse("metric_f = 0.0").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setMetricD(0.0).build())));
-      assertTrue(Query.parse("metric_f = 1.5").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setMetricD(1.5).build())));
-      assertTrue(Query.parse("metric_f = -1.5").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setMetricD(-1.5).build())));
-      assertTrue(Query.parse("metric_f = 1e5").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setMetricD(100000).build())));
-      assertTrue(Query.parse("metric_f = 1E5").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setMetricD(100000).build())));
-      assertTrue(Query.parse("metric_f = -1.2e-5").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setMetricD(-0.000012).build())));
+      assertTrue(Query.parse("metric_f = 1.").call(Event.builder().withMetric(1.0).build()));
+      assertTrue(Query.parse("metric_f = 0.0").call(Event.builder().withMetric(0.0).build()));
+      assertTrue(Query.parse("metric_f = 1.5").call(Event.builder().withMetric(1.5).build()));
+      assertTrue(Query.parse("metric_f = -1.5").call(Event.builder().withMetric(-1.5).build()));
+      assertTrue(Query.parse("metric_f = 1e5").call(Event.builder().withMetric(100000).build()));
+      assertTrue(Query.parse("metric_f = 1E5").call(Event.builder().withMetric(100000).build()));
+      assertTrue(Query.parse("metric_f = -1.2e-5").call(Event.builder().withMetric(-0.000012).build()));
    }
 
    @Test
    public void testTags() throws Exception {
-      assertTrue(Query.parse("tagged \"cat\"").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().addTags("cat").build())));
+      assertTrue(Query.parse("tagged \"cat\"").call(Event.builder().addTags("cat").build()));
    }
 
    @Test
    public void testLiterals() throws Exception {
-      assertTrue(Query.parse("true").call(Event.fromProtoBufEvent(Proto.Event.getDefaultInstance())));
-      assertFalse(Query.parse("false").call(Event.fromProtoBufEvent(Proto.Event.getDefaultInstance())));
+      assertTrue(Query.parse("true").call(Event.builder().build()));
+      assertFalse(Query.parse("false").call(Event.builder().build()));
    }
 
    @Test
    public void testBooleanOperators() throws Exception {
-      assertTrue(Query.parse("not host = 1").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setHost("2").build())));
-      assertFalse(Query.parse("not host = 1").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setHost("1").build())));
+      assertTrue(Query.parse("not host = 1").call(Event.builder().withHost("2").build()));
+      assertFalse(Query.parse("not host = 1").call(Event.builder().withHost("1").build()));
 
-      assertTrue(Query.parse("host = 1 and state = 2").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setHost("1").setState("2").build())));
-      assertFalse(Query.parse("host = 1 and state = 2").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setHost("2").setState("1").build())));
+      assertTrue(Query.parse("host = 1 and state = 2").call(Event.builder().withHost("1").withState("2").build()));
+      assertFalse(Query.parse("host = 1 and state = 2").call(Event.builder().withHost("2").withState("1").build()));
 
-      assertTrue(Query.parse("host = 1 or state = 2").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setHost("1").setState("1").build())));
-      assertTrue(Query.parse("host = 1 or state = 2").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setHost("2").setState("2").build())));
+      assertTrue(Query.parse("host = 1 or state = 2").call(Event.builder().withHost("1").withState("1").build()));
+      assertTrue(Query.parse("host = 1 or state = 2").call(Event.builder().withHost("2").withState("2").build()));
    }
 
    @Test
    public void testPredicates() throws Exception {
-      assertTrue(Query.parse("time = 2").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setTime(2).build())));
-      assertFalse(Query.parse("time = 2").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setTime(3).build())));
-      assertFalse(Query.parse("time = 2").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setTime(1).build())));
+      assertTrue(Query.parse("time = 2").call(Event.builder().withTime(2).build()));
+      assertFalse(Query.parse("time = 2").call(Event.builder().withTime(3).build()));
+      assertFalse(Query.parse("time = 2").call(Event.builder().withTime(1).build()));
 
-      assertTrue(Query.parse("time > 2").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setTime(3).build())));
-      assertFalse(Query.parse("time > 2").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setTime(1).build())));
-      assertFalse(Query.parse("time > 2").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setTime(2).build())));
+      assertTrue(Query.parse("time > 2").call(Event.builder().withTime(3).build()));
+      assertFalse(Query.parse("time > 2").call(Event.builder().withTime(1).build()));
+      assertFalse(Query.parse("time > 2").call(Event.builder().withTime(2).build()));
 
-      assertTrue(Query.parse("time < 2").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setTime(1).build())));
-      assertFalse(Query.parse("time < 2").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setTime(2).build())));
+      assertTrue(Query.parse("time < 2").call(Event.builder().withTime(1).build()));
+      assertFalse(Query.parse("time < 2").call(Event.builder().withTime(2).build()));
 
-      assertTrue(Query.parse("time >= 2").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setTime(2).build())));
-      assertTrue(Query.parse("time >= 2").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setTime(3).build())));
-      assertFalse(Query.parse("time >= 2").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setTime(1).build())));
+      assertTrue(Query.parse("time >= 2").call(Event.builder().withTime(2).build()));
+      assertTrue(Query.parse("time >= 2").call(Event.builder().withTime(3).build()));
+      assertFalse(Query.parse("time >= 2").call(Event.builder().withTime(1).build()));
 
-      assertTrue(Query.parse("time <= 2").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setTime(2).build())));
-      assertTrue(Query.parse("time <= 2").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setTime(1).build())));
-      assertFalse(Query.parse("time <= 2").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setTime(3).build())));
+      assertTrue(Query.parse("time <= 2").call(Event.builder().withTime(2).build()));
+      assertTrue(Query.parse("time <= 2").call(Event.builder().withTime(1).build()));
+      assertFalse(Query.parse("time <= 2").call(Event.builder().withTime(3).build()));
 
-      assertTrue(Query.parse("time != 2").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setTime(1).build())));
-      assertTrue(Query.parse("time != 2").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setTime(3).build())));
-      assertFalse(Query.parse("time != 2").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setTime(2).build())));
+      assertTrue(Query.parse("time != 2").call(Event.builder().withTime(1).build()));
+      assertTrue(Query.parse("time != 2").call(Event.builder().withTime(3).build()));
+      assertFalse(Query.parse("time != 2").call(Event.builder().withTime(2).build()));
    }
 
    @Test
    public void testPrecedence() {
-      assertTrue(Query.parse("not host = 1 and host = 2").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setHost("2").build())));
-      assertFalse(Query.parse("not host = 1 and host = 2").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setHost("1").build())));
+      assertTrue(Query.parse("not host = 1 and host = 2").call(Event.builder().withHost("2").build()));
+      assertFalse(Query.parse("not host = 1 and host = 2").call(Event.builder().withHost("1").build()));
 
-      assertTrue(Query.parse("not host = 1 or host = 2 and host = 3").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setHost("3").build())));
-      assertTrue(Query.parse("not host = 1 or host = 2 and host = 3").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setHost("2").build())));
-      assertFalse(Query.parse("not host = 1 or host = 2 and host = 3").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setHost("1").build())));
+      assertTrue(Query.parse("not host = 1 or host = 2 and host = 3").call(Event.builder().withHost("3").build()));
+      assertTrue(Query.parse("not host = 1 or host = 2 and host = 3").call(Event.builder().withHost("2").build()));
+      assertFalse(Query.parse("not host = 1 or host = 2 and host = 3").call(Event.builder().withHost("1").build()));
 
-      assertTrue(Query.parse("not ((host = 1 or host = 2) and host = 3)").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setHost("1").build())));
-      assertTrue(Query.parse("not ((host = 1 or host = 2) and host = 3)").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setHost("2").build())));
-      assertTrue(Query.parse("not ((host = 1 or host = 2) and host = 3)").call(Event.fromProtoBufEvent(Proto.Event.newBuilder().setHost("3").build())));
+      assertTrue(Query.parse("not ((host = 1 or host = 2) and host = 3)").call(Event.builder().withHost("1").build()));
+      assertTrue(Query.parse("not ((host = 1 or host = 2) and host = 3)").call(Event.builder().withHost("2").build()));
+      assertTrue(Query.parse("not ((host = 1 or host = 2) and host = 3)").call(Event.builder().withHost("3").build()));
    }
 }
