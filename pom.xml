@@ -49,7 +49,7 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <vertx.version>3.0.0-dev_preview1</vertx.version>
+        <vertx.version>3.0.0-milestone2</vertx.version>
 
         <!--Dependency versions-->
         <junit.version>4.11</junit.version>
