@@ -5,7 +5,7 @@
     <groupId>com.github.blakepettersson</groupId>
     <artifactId>reactmann</artifactId>
     <packaging>pom</packaging>
-    <version>0.4-SNAPSHOT</version>
+    <version>0.4-preview</version>
     <name>Reactmann Parent</name>
     <url>https://github.com/blakepettersson/reactmann</url>
     <description>A Riemann inspired monitoring system using vert.x and rxjava.</description>
