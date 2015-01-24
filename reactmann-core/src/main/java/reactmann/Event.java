@@ -172,12 +172,32 @@ public class Event {
             return new Builder(new Event(event.getHost(), event.getService(), event.getState(), event.getDescription(), event.getTagsList(), attributes, event.getTime(), event.getTtl(), metric));
         }
 
-        public Builder addTags(String... tags) {
-            return new Builder(new Event(event.getHost(), event.getService(), event.getState(), event.getDescription(), Arrays.asList(tags), event.getAttributes(), event.getTime(), event.getTtl(), event.getMetric()));
+        public Builder withTtl(float ttl) {
+            return new Builder(new Event(event.getHost(), event.getService(), event.getState(), event.getDescription(), event.getTags(), event.getAttributes(), event.getTime(), ttl, event.getMetric()));
         }
 
         public Builder withTime(long time) {
             return new Builder(new Event(event.getHost(), event.getService(), event.getState(), event.getDescription(), event.getTags(), event.getAttributes(), time, event.getTtl(), event.getMetric()));
+        }
+
+        public Builder addTags(String... tags) {
+            List<String> tagList = new ArrayList<>(event.getTags());
+            tagList.addAll(Arrays.asList(tags));
+            return new Builder(new Event(event.getHost(), event.getService(), event.getState(), event.getDescription(), tagList, event.getAttributes(), event.getTime(), event.getTtl(), event.getMetric()));
+        }
+
+        public Builder withTags(List<String> tags) {
+            return new Builder(new Event(event.getHost(), event.getService(), event.getState(), event.getDescription(), tags, event.getAttributes(), event.getTime(), event.getTtl(), event.getMetric()));
+        }
+
+        public Builder addAttribute(String key, String value) {
+            Map<String, String> attributes = new HashMap<>(event.getAttributes());
+            attributes.put(key, value);
+            return new Builder(new Event(event.getHost(), event.getService(), event.getState(), event.getDescription(), event.getTags(), attributes, event.getTime(), event.getTtl(), event.getMetric()));
+        }
+
+        public Builder withAttributes(Map<String,String> attributes) {
+            return new Builder(new Event(event.getHost(), event.getService(), event.getState(), event.getDescription(), event.getTags(), attributes, event.getTime(), event.getTtl(), event.getMetric()));
         }
 
         public Builder withHost(String host) {
