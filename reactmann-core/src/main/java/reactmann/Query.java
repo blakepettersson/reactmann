@@ -12,6 +12,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -58,6 +59,7 @@ public class Query {
                 return !(boolean) parseEquals(event, children);
             case "=~":
             case "~=":
+                return parseRegexp(event, children);
             case "nil":
                 return null;
             case "null":
@@ -87,6 +89,16 @@ public class Query {
                 return event.getTtl();
             default:
                 return parseString(tree);
+        }
+    }
+
+    private static Object parseRegexp(Event event, List<CommonTree> children) {
+        try {
+            String left = (String) getFilter(children.get(0), event);
+            String right = StringEscapeUtils.unescapeJava(children.get(1).getText().replaceAll("^\"|\"$", ""));
+            return Pattern.matches(right, left);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

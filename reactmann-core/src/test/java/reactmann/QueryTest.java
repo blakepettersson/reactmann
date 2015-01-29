@@ -4,6 +4,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import rx.functions.Func1;
 
 public class QueryTest {
 
@@ -103,5 +104,17 @@ public class QueryTest {
       assertTrue(Query.parse("not ((host = 1 or host = 2) and host = 3)").call(Event.builder().withHost("1").build()));
       assertTrue(Query.parse("not ((host = 1 or host = 2) and host = 3)").call(Event.builder().withHost("2").build()));
       assertTrue(Query.parse("not ((host = 1 or host = 2) and host = 3)").call(Event.builder().withHost("3").build()));
+   }
+
+   @Test
+   public void testRegexps() {
+      Func1<Event, Boolean> query = Query.parse("host ~= \"foo?[1-9]+\"");
+      assertTrue(query.call(Event.builder().withHost("foo19").build()));
+      assertTrue(query.call(Event.builder().withHost("foo1").build()));
+      assertTrue(query.call(Event.builder().withHost("fo42").build()));
+
+      assertFalse(query.call(Event.builder().withHost("abc").build()));
+      assertFalse(query.call(Event.builder().withHost("foo").build()));
+      assertFalse(query.call(Event.builder().withHost("fooo42").build()));
    }
 }
