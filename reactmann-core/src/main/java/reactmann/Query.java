@@ -143,6 +143,14 @@ public class Query {
             return left.equals(right);
         }
 
+        if(left == null && right == null) {
+            return true;
+        }
+
+        if(right == null || left == null) {
+            return false;
+        }
+
         return left.equals("" + right);
     }
 

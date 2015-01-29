@@ -107,6 +107,14 @@ public class QueryTest {
    }
 
    @Test
+   public void testNull() throws Exception {
+      Func1<Event, Boolean> query = Query.parse("host = null and description != nil");
+      assertTrue(query.call(Event.builder().withHost(null).build()));
+      assertFalse(query.call(Event.builder().withHost("not null").build()));
+      assertFalse(query.call(Event.builder().withHost("not null").withDescription(null).build()));
+   }
+
+   @Test
    public void testRegexps() {
       Func1<Event, Boolean> query = Query.parse("host ~= \"foo?[1-9]+\"");
       assertTrue(query.call(Event.builder().withHost("foo19").build()));
