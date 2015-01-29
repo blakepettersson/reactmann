@@ -11,7 +11,20 @@
         <dependency>
             <groupId>com.github.blakepettersson</groupId>
             <artifactId>reactmann-core</artifactId>
-            <version>0.4-preview</version>
+            <version>0.5-preview</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-core</artifactId>
+            <version>3.0.0-milestone2</version>
+            <type>test-jar</type>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
