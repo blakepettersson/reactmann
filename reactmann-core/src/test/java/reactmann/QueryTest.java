@@ -125,4 +125,14 @@ public class QueryTest {
       assertFalse(query.call(Event.builder().withHost("foo").build()));
       assertFalse(query.call(Event.builder().withHost("fooo42").build()));
    }
+
+   @Test
+   public void testWildcards() {
+      Func1<Event, Boolean> query = Query.parse("host =~ \"%s.\"");
+      assertTrue(query.call(Event.builder().withHost("s.").build()));
+      assertTrue(query.call(Event.builder().withHost("foos.").build()));
+
+      assertFalse(query.call(Event.builder().withHost("a.").build()));
+      assertFalse(query.call(Event.builder().withHost("s.murf").build()));
+   }
 }

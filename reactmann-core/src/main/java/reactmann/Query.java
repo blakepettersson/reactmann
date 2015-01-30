@@ -12,6 +12,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -58,6 +59,7 @@ public class Query {
             case "!=":
                 return !(boolean) parseEquals(event, children);
             case "=~":
+                return parseWildcard(event, children);
             case "~=":
                 return parseRegexp(event, children);
             case "nil":
@@ -89,6 +91,33 @@ public class Query {
                 return event.getTtl();
             default:
                 return parseString(tree);
+        }
+    }
+
+    private static Object parseWildcard(Event event, List<CommonTree> children) {
+        try {
+            String left = (String) getFilter(children.get(0), event);
+            String right = StringEscapeUtils.unescapeJava(children.get(1).getText().replaceAll("^\"|\"$", ""));
+
+            List<String> matches = new ArrayList<>();
+            Pattern pattern = Pattern.compile("%|[^%]+");
+            Matcher matcher = pattern.matcher(right);
+
+            while (matcher.find()) {
+                matches.add(matcher.group());
+            }
+
+            Optional<String> reduce = matches.stream().map(token -> {
+                if ("%".equals(token)) {
+                    return ".*";
+                }
+
+                return Pattern.quote(token);
+            }).reduce((sum, agg) -> sum + agg);
+            String regex = "^" + reduce.orElse("") + "$";
+            return Pattern.matches(regex, left);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
