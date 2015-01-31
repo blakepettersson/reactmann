@@ -57,7 +57,7 @@ public class Query {
             case "<=":
                 return parseLessThanOrEqual(event, children);
             case "!=":
-                return !(boolean) parseEquals(event, children);
+                return !parseEquals(event, children);
             case "=~":
                 return parseWildcard(event, children);
             case "~=":
@@ -94,7 +94,7 @@ public class Query {
         }
     }
 
-    private static Object parseWildcard(Event event, List<CommonTree> children) {
+    private static boolean parseWildcard(Event event, List<CommonTree> children) {
         try {
             String left = (String) getFilter(children.get(0), event);
             String right = StringEscapeUtils.unescapeJava(children.get(1).getText().replaceAll("^\"|\"$", ""));
@@ -121,7 +121,7 @@ public class Query {
         }
     }
 
-    private static Object parseRegexp(Event event, List<CommonTree> children) {
+    private static boolean parseRegexp(Event event, List<CommonTree> children) {
         try {
             String left = (String) getFilter(children.get(0), event);
             String right = StringEscapeUtils.unescapeJava(children.get(1).getText().replaceAll("^\"|\"$", ""));
@@ -151,21 +151,21 @@ public class Query {
         }
     }
 
-    private static Object parseOr(Event event, List<CommonTree> children) {
+    private static boolean parseOr(Event event, List<CommonTree> children) {
         Object left = getFilter(children.get(0), event);
         Object right = getFilter(children.get(1), event);
 
         return (boolean) left || (boolean) right;
     }
 
-    private static Object parseAnd(Event event, List<CommonTree> children) {
+    private static boolean parseAnd(Event event, List<CommonTree> children) {
         Object left = getFilter(children.get(0), event);
         Object right = getFilter(children.get(1), event);
 
         return (boolean) left && (boolean) right;
     }
 
-    private static Object parseEquals(Event event, List<CommonTree> children) {
+    private static boolean parseEquals(Event event, List<CommonTree> children) {
         Object left = getFilter(children.get(0), event);
         Object right = getFilter(children.get(1), event);
         if (left instanceof Number) {
