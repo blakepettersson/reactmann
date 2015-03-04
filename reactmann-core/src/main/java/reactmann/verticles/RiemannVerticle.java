@@ -1,6 +1,7 @@
-package reactmann;
+package reactmann.verticles;
 
 import io.vertx.core.AbstractVerticle;
+import reactmann.*;
 import rx.Observable;
 
 /**

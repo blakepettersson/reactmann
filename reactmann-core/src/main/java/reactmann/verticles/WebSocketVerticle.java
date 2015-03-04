@@ -1,4 +1,4 @@
-package reactmann;
+package reactmann.verticles;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.http.HttpServer;
@@ -9,6 +9,9 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.rx.java.ObservableFuture;
 import io.vertx.rx.java.RxHelper;
+import reactmann.Event;
+import reactmann.Riemann;
+import reactmann.Tup2;
 import reactmann.observables.EventObservable;
 import reactmann.subscribers.EventToJsonAction;
 import rx.Observable;

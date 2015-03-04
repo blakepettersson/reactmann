@@ -1,10 +1,11 @@
-package reactmann;
+package reactmann.verticles;
 
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
+import reactmann.Event;
+import reactmann.Index;
+import reactmann.Riemann;
 import rx.Observable;
-
-import static org.junit.Assert.*;
 
 public class RiemannVerticleTest extends VertxTestBase {
 

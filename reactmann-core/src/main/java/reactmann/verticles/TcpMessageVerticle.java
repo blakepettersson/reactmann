@@ -1,4 +1,4 @@
-package reactmann;
+package reactmann.verticles;
 
 import com.aphyr.riemann.Proto;
 import io.vertx.core.AbstractVerticle;
@@ -10,6 +10,8 @@ import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.streams.WriteStream;
 import io.vertx.rx.java.ObservableFuture;
 import io.vertx.rx.java.RxHelper;
+import reactmann.NetSocketException;
+import reactmann.Riemann;
 
 public class TcpMessageVerticle extends AbstractVerticle {
     private static final Logger log = LoggerFactory.getLogger(TcpMessageVerticle.class);
