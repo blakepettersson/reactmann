@@ -45,6 +45,18 @@ public class EventTest {
         assertEquals(new Event("", "", "", "", null, null, 0, 0.0F, 0.0), event);
     }
 
+    @Test(expected = UnsupportedOperationException.class)
+    public void testTagsImmutability() {
+        Event event = Event.builder().fromProtoBufEvent(Proto.Event.getDefaultInstance()).build();
+        event.getTags().add("fail");
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testAttributesImmutability() {
+        Event event = Event.builder().fromProtoBufEvent(Proto.Event.getDefaultInstance()).build();
+        event.getAttributes().put("fail", "more fail");
+    }
+
     @Test
     public void testWithTtl() {
         assertEquals(1337, Event.builder().withTtl(1337).build().getTtl(), 0.001);

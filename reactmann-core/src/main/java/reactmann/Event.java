@@ -71,10 +71,6 @@ public class Event {
         return time;
     }
 
-    public List<String> getTags() {
-        return tags;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -89,6 +85,10 @@ public class Event {
 
     public String getHost() {
         return host;
+    }
+
+    public List<String> getTags() {
+        return Collections.unmodifiableList(tags);
     }
 
     public Map<String, String> getAttributes() {
