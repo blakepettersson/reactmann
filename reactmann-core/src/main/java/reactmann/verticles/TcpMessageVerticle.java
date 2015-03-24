@@ -10,6 +10,8 @@ import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.streams.WriteStream;
 import io.vertx.rx.java.ObservableFuture;
 import io.vertx.rx.java.RxHelper;
+import reactmann.Event;
+import reactmann.EventType;
 import reactmann.NetSocketException;
 import reactmann.Riemann;
 
@@ -31,8 +33,12 @@ public class TcpMessageVerticle extends AbstractVerticle {
         RxHelper.toObservable(netServer.connectStream())
                 .flatMap(s -> Riemann.convertBufferStreamToMessages(s, RxHelper.toObservable(s)))
                 .subscribe(s -> {
+                    Proto.Msg msg = s.getRight();
+                    msg.getEventsList().stream().map(e -> Event.builder().fromProtoBufEvent(e)).forEach(e -> {
+                        vertx.eventBus().publish(EventType.STREAM.getAddress(), e.build());
+                    });
+
                     sendResponse(Proto.Msg.newBuilder().setOk(true).build(), s.getLeft());
-                    vertx.eventBus().publish("riemann.stream", s.getRight().toByteArray());
                 }, e -> {
                     log.error(e);
 

@@ -1,16 +1,20 @@
 package reactmann.integration.java;
 
 import com.aphyr.riemann.Proto;
+import com.google.protobuf.InvalidProtocolBufferException;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.net.NetSocket;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 import reactmann.Event;
+import reactmann.EventMessageCodec;
+import reactmann.EventType;
 import reactmann.Riemann;
 import rx.Observable;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -18,21 +22,22 @@ import static org.mockito.Mockito.mock;
 public class RiemannTest extends VertxTestBase {
     @Test
     public void testGetEvents() {
+        vertx.eventBus().registerDefaultCodec(Event.class, new EventMessageCodec());
         Event event = new Event("test", "test", "test", "test", null, null, 1, 1.0F, 1.0);
-        Riemann.getEvents(vertx).forEach(e -> {
+        Riemann.getEvents(vertx, EventType.STREAM).forEach(e -> {
             assertEquals(e, event);
             testComplete();
         });
 
-        vertx.eventBus().send("riemann.stream", event.toProtoBufMessage().toByteArray());
+        vertx.eventBus().send(EventType.STREAM.getAddress(), event);
 
-        await();
+        await(5, TimeUnit.SECONDS);
     }
 
     @Test
-    public void testConvertBufferStreamToMessages() {
+    public void testConvertBufferStreamToMessages() throws InvalidProtocolBufferException {
         Event event = new Event("test", "test", "test", "test", null, null, 1, 1.0F, 1.0);
-        byte[] bytes = event.toProtoBufMessage().toByteArray();
+        byte[] bytes = toProtoBufMessage(event).toByteArray();
 
         Riemann.convertBufferStreamToMessages(mock(NetSocket.class), Observable.just(
                 Buffer.buffer().appendInt(bytes.length),
@@ -44,15 +49,15 @@ public class RiemannTest extends VertxTestBase {
             testComplete();
         });
 
-        await();
+        await(5, TimeUnit.SECONDS);
     }
 
     @Test
-    public void testConvertBufferStreamToMessagesWithMultipleEvents() {
+    public void testConvertBufferStreamToMessagesWithMultipleEvents() throws InvalidProtocolBufferException {
         Event event = new Event("test", "test", "test", "test", null, null, 1, 1.0F, 1.0);
         Event secondEvent = new Event("test2", "test2", "test2", "test2", null, null, 1, 1.0F, 1.0);
-        byte[] bytes = event.toProtoBufMessage().toByteArray();
-        byte[] secondBytes = secondEvent.toProtoBufMessage().toByteArray();
+        byte[] bytes = toProtoBufMessage(event).toByteArray();
+        byte[] secondBytes = toProtoBufMessage(secondEvent).toByteArray();
 
         byte[] array = ByteBuffer
                 .allocate(34)
@@ -76,7 +81,14 @@ public class RiemannTest extends VertxTestBase {
             testComplete();
         });
 
-        await();
+        await(5, TimeUnit.SECONDS);
     }
 
+
+    private Proto.Msg toProtoBufMessage(Event event) throws InvalidProtocolBufferException {
+        Buffer buffer = Buffer.buffer();
+        new EventMessageCodec().encodeToWire(buffer, event);
+        Proto.Event protobufEvent = Proto.Event.parseFrom(buffer.getBytes(4, buffer.length()));
+        return Proto.Msg.newBuilder(Proto.Msg.getDefaultInstance()).addEvents(protobufEvent).build();
+    }
 }

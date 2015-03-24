@@ -1,6 +1,5 @@
 package reactmann;
 
-import com.aphyr.riemann.Proto;
 import io.vertx.core.Vertx;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 
@@ -67,16 +66,16 @@ public class Index implements ConcurrentMap<Tup2<String, String>, Event> {
     }
 
     @Override
-    public Event put(Tup2<String, String> key, Event value) {
+    public Event put(Tup2<String, String> key, Event event) {
         Long timeout = timeouts.get(key);
         if (timeout != null) {
             vertx.cancelTimer(timeout);
             timeouts.remove(key);
         }
 
-        vertx.eventBus().publish("riemann.index", value.toProtoBufEvent().toByteArray());
-        timeouts.put(key, vertx.setTimer(Math.round(value.getTtl()), (e) -> remove(key)));
-        return map.put(key, value);
+        vertx.eventBus().publish(EventType.INDEX.getAddress(), event);
+        timeouts.put(key, vertx.setTimer(Math.round(event.getTtl()), (e) -> remove(key)));
+        return map.put(key, event);
     }
 
     @Override
@@ -92,10 +91,8 @@ public class Index implements ConcurrentMap<Tup2<String, String>, Event> {
         Event expired = new Event(remove.getHost(), remove.getService(), "expired", remove.getDescription(), remove.getTags(), remove.getAttributes(), remove.getTime(),
                 remove.getTtl(), remove.getMetric());
 
-        Proto.Event value = expired.toProtoBufEvent();
-
-        vertx.eventBus().publish("riemann.index", value.toByteArray());
-        vertx.eventBus().publish("riemann.stream", Proto.Msg.newBuilder().addEvents(value).build().toByteArray());
+        vertx.eventBus().publish(EventType.INDEX.getAddress(), expired);
+        vertx.eventBus().publish(EventType.STREAM.getAddress(), expired);
 
         return expired;
     }

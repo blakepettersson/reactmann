@@ -1,16 +1,19 @@
 package reactmann.integration.java;
 
 import io.vertx.test.core.VertxTestBase;
+import org.junit.Before;
 import org.junit.Test;
-import reactmann.Event;
-import reactmann.Index;
-import reactmann.Riemann;
-import reactmann.Tup2;
+import reactmann.*;
 
 /**
  * @author blake
  */
 public class IndexTest extends VertxTestBase {
+
+    @Before
+    public void beforeAll() {
+        vertx.eventBus().registerDefaultCodec(Event.class, new EventMessageCodec());
+    }
 
     @Test
     public void testRemove() {
@@ -26,7 +29,7 @@ public class IndexTest extends VertxTestBase {
     public void testRemoveWithEventBus() {
         Index index = new Index(vertx);
 
-        Riemann.getEvents(vertx).forEach(e -> {
+        Riemann.getEvents(vertx, EventType.STREAM).forEach(e -> {
             assertEquals(0, index.size());
             assertEquals("expired", e.getState());
             testComplete();
@@ -58,7 +61,7 @@ public class IndexTest extends VertxTestBase {
     public void testPutWithTtlAndEventBus() {
         Index index = new Index(vertx);
 
-        Riemann.getEvents(vertx).forEach(e -> {
+        Riemann.getEvents(vertx, EventType.STREAM).forEach(e -> {
             assertEquals(0, index.size());
             assertEquals("expired", e.getState());
             testComplete();

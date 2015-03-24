@@ -10,6 +10,7 @@ import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.rx.java.ObservableFuture;
 import io.vertx.rx.java.RxHelper;
 import reactmann.Event;
+import reactmann.EventType;
 import reactmann.Riemann;
 import reactmann.Tup2;
 import reactmann.observables.EventObservable;
@@ -37,7 +38,7 @@ public class WebSocketVerticle extends AbstractVerticle {
         );
 
         Observable<Tup2<ServerWebSocket, Func1<Event, Boolean>>> eventObservable = EventObservable.convertFromWebSocketObservable(RxHelper.toObservable(httpServer.websocketStream()));
-        eventObservable.subscribe(new EventToJsonAction(Riemann.getEvents(vertx), WebSocketFrameImpl::new), e -> {
+        eventObservable.subscribe(new EventToJsonAction(Riemann.getEvents(vertx, EventType.INDEX), WebSocketFrameImpl::new), e -> {
             log.error(e);
             //TODO: Fix proper error handling
         });

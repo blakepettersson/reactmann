@@ -2,9 +2,7 @@ package reactmann.verticles;
 
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
-import reactmann.Event;
-import reactmann.Index;
-import reactmann.Riemann;
+import reactmann.*;
 import rx.Observable;
 
 public class RiemannVerticleTest extends VertxTestBase {
@@ -25,8 +23,14 @@ public class RiemannVerticleTest extends VertxTestBase {
                 });
             }
         };
-        riemannVerticle.setIndex(new Index(vertx));
-        riemannVerticle.observeStream(Riemann.getEvents(vertx).startWith(Event.builder().withState("ok").build()));
+        IndexVerticle indexVerticle = new IndexVerticle();
+        indexVerticle.init(vertx, null);
+        indexVerticle.start();
+
+        riemannVerticle.init(vertx, null);
+
+        vertx.eventBus().registerDefaultCodec(Event.class, new EventMessageCodec());
+        riemannVerticle.observeStream(Riemann.getEvents(vertx, EventType.STREAM).startWith(Event.builder().withState("ok").build()));
         await();
     }
 }

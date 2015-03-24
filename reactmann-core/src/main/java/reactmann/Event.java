@@ -35,30 +35,6 @@ public class Event {
         return new Builder(new Event("", "", "", "", null, null, System.currentTimeMillis(), 1.0F, 1.0));
     }
 
-    public Proto.Msg toProtoBufMessage() {
-        return Proto.Msg.newBuilder(Proto.Msg.getDefaultInstance()).addEvents(this.toProtoBufEvent()).build();
-    }
-
-    public Proto.Event toProtoBufEvent() {
-        List<Proto.Attribute> attributeList = attributes
-                .entrySet()
-                .stream()
-                .map(a -> Proto.Attribute.newBuilder().setKey(a.getKey()).setValue(a.getValue()).build())
-                .collect(Collectors.toList());
-
-        return Proto.Event.newBuilder()
-                .setDescription(description)
-                .setHost(host)
-                .setMetricD(metric)
-                .setService(service)
-                .setTime(time)
-                .setTtl(ttl)
-                .setState(state)
-                .addAllTags(tags)
-                .addAllAttributes(attributeList)
-                .build();
-    }
-
     public double getMetric() {
         return metric;
     }
@@ -150,7 +126,7 @@ public class Event {
     public static class Builder {
         private final Event event;
 
-        private Builder(Event event) {
+        Builder(Event event) {
             this.event = event;
         }
 

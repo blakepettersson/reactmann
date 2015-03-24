@@ -1,7 +1,6 @@
 package reactmann;
 
 import com.aphyr.riemann.Proto;
-import com.google.protobuf.InvalidProtocolBufferException;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.streams.WriteStream;
@@ -16,15 +15,8 @@ public class Riemann {
     private Riemann() {
     }
 
-    public static Observable<Event> getEvents(Vertx vertx) {
-        return RxHelper.toObservable(vertx.eventBus().consumer("riemann.stream").bodyStream()).flatMap(m -> {
-            try {
-                //noinspection unchecked
-                return Observable.from(Proto.Msg.parseFrom((byte[]) m).getEventsList());
-            } catch (InvalidProtocolBufferException e) {
-                throw new RuntimeException(e);
-            }
-        }).map(e -> Event.builder().fromProtoBufEvent(e).build());
+    public static Observable<Event> getEvents(Vertx vertx, EventType eventType) {
+        return RxHelper.toObservable(vertx.eventBus().consumer(eventType.getAddress()).bodyStream()).map(o -> (Event)o);
     }
 
     public static <T extends WriteStream<Buffer>> Observable<Tup2<T, Proto.Msg>> convertBufferStreamToMessages(T socket, Observable<Buffer> observable) {

@@ -8,24 +8,21 @@ import rx.Observable;
  * @author blake
  */
 public abstract class RiemannVerticle extends AbstractVerticle {
-    private Index index;
 
     @Override
     public void start() {
-        vertx.deployVerticle("java:" + WebSocketVerticle.class.getName(), webSocketCallback -> {
-            vertx.deployVerticle("java:" + TcpMessageVerticle.class.getName(), tcpMessageCallback -> observeStream(Riemann.getEvents(vertx)));
-            if(index == null) {
-                index = new Index(vertx);
-            }
+        vertx.eventBus().registerDefaultCodec(Event.class, new EventMessageCodec());
+        vertx.deployVerticle("java:" + IndexVerticle.class.getName(), indexCallback -> {
+            vertx.deployVerticle("java:" + WebSocketVerticle.class.getName(), webSocketCallback -> {
+                vertx.deployVerticle("java:" + TcpMessageVerticle.class.getName(), tcpMessageCallback -> {
+                    observeStream(Riemann.getEvents(vertx, EventType.STREAM));
+                });
+            });
         });
     }
 
-    public void setIndex(Index index) {
-        this.index = index;
-    }
-
-    public void index(Event event) {
-        index.put(Tup2.create(event.getHost(), event.getService()), event);
+    public final void index(Event event) {
+        vertx.eventBus().publish("riemann.addToIndex", event);
     }
 
     public abstract void observeStream(Observable<Event> events);
