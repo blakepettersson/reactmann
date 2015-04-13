@@ -47,7 +47,7 @@ public class TcpMessageVerticle extends AbstractVerticle {
                     }
                 });
 
-        netServer.listen(netServerObservable.asHandler());
+        netServer.listen(port, netServerObservable.toHandler());
     }
 
     private void sendResponse(Proto.Msg msg, WriteStream<Buffer> sock) {

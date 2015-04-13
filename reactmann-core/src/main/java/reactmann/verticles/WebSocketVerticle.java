@@ -43,6 +43,6 @@ public class WebSocketVerticle extends AbstractVerticle {
             //TODO: Fix proper error handling
         });
 
-        httpServer.listen(httpServerObservable.asHandler());
+        httpServer.listen(httpServerObservable.toHandler());
     }
 }
